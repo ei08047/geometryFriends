@@ -1,5 +1,0 @@
-C:\Users\José\Desktop\GeometryFriendsAgents\GeometryFriendsGame\Release\Agents\Aiad.dll
-C:\Users\José\Desktop\GeometryFriendsAgents\obj\Release\Aiad.dll
-C:\Users\José\Desktop\GeometryFriendsAgents\obj\Release\Aiad.pdb
-C:\Users\José\Desktop\GeometryFriendsAgents\GeometryFriendsGame\Release\Agents\Aiad.pdb
-C:\Users\José\Desktop\GeometryFriendsAgents\obj\Release\GeometryFriendsAgents.csprojResolveAssemblyReference.cache

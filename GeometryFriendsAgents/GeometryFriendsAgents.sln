@@ -5,12 +5,12 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeometryFriendsAgents", "GeometryFriendsAgents.csproj", "{6F45AB29-7874-4B3D-8073-B2D5F0C1A35F}"
 EndProject
-Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "GeometryFriends", "GeometryFriendsGame\Release\GeometryFriends.exe", "{284D26E1-1487-4B45-A2EB-4F12577474F3}"
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "GeometryFriends", "GeometryFriendsGame\Release\GeometryFriends.exe", "{6919891F-BA79-43BF-A95A-114D288CCD41}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\Users\José\Desktop\GeometryFriendsAgents\GeometryFriendsGame\Release\GeometryFriends.exe
+		Executable = C:\Users\José\Desktop\geometryFriends\GeometryFriendsAgents\GeometryFriendsGame\Release\GeometryFriends.exe
 		RemoteMachine = K53
-		StartingDirectory = C:\Users\José\Desktop\GeometryFriendsAgents\GeometryFriendsGame\Release
+		StartingDirectory = C:\Users\José\Desktop\geometryFriends\GeometryFriendsAgents\GeometryFriendsGame\Release
 		Environment = Default
 		LaunchingEngine = 00000000-0000-0000-0000-000000000000
 		UseLegacyDebugEngines = No
@@ -38,12 +38,12 @@ Global
 		{6F45AB29-7874-4B3D-8073-B2D5F0C1A35F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{6F45AB29-7874-4B3D-8073-B2D5F0C1A35F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{6F45AB29-7874-4B3D-8073-B2D5F0C1A35F}.Release|x86.ActiveCfg = Release|Any CPU
-		{284D26E1-1487-4B45-A2EB-4F12577474F3}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{284D26E1-1487-4B45-A2EB-4F12577474F3}.Debug|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{284D26E1-1487-4B45-A2EB-4F12577474F3}.Debug|x86.ActiveCfg = Release|Any CPU
-		{284D26E1-1487-4B45-A2EB-4F12577474F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{284D26E1-1487-4B45-A2EB-4F12577474F3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{284D26E1-1487-4B45-A2EB-4F12577474F3}.Release|x86.ActiveCfg = Release|Any CPU
+		{6919891F-BA79-43BF-A95A-114D288CCD41}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{6919891F-BA79-43BF-A95A-114D288CCD41}.Debug|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6919891F-BA79-43BF-A95A-114D288CCD41}.Debug|x86.ActiveCfg = Release|Any CPU
+		{6919891F-BA79-43BF-A95A-114D288CCD41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6919891F-BA79-43BF-A95A-114D288CCD41}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6919891F-BA79-43BF-A95A-114D288CCD41}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

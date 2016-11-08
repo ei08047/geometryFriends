@@ -27,10 +27,14 @@ namespace GeometryFriendsAgents
         private Random rnd;
 
         //predictor of actions for the circle
-        private Boolean predicted_catch = false;
         private ActionSimulator predictor = null;
         private DebugInformation[] debugInfo = null;
         private int debugCircleSize = 20;
+
+
+        //goal
+        Goal capturePoints;
+        Path path;
 
         //debug agent predictions and history keeping
         private List<CollectibleRepresentation> caughtCollectibles;
@@ -47,16 +51,14 @@ namespace GeometryFriendsAgents
         private ObstacleRepresentation[] circlePlatformsInfo;
         private CollectibleRepresentation[] collectiblesInfo;
 
-        //Map
-        private Grid mapa;
-       
-        //Graph
-        private Graph grafo;
-        private State currentState;
-
         private int nCollectiblesLeft;
 
         private List<AgentMessage> messages;
+
+        //low level representation
+        Grid world = new Grid();
+        State s;
+        Graph g;
 
         //Area of the game screen
         private Rectangle area;
@@ -73,11 +75,10 @@ namespace GeometryFriendsAgents
 
             //prepare the possible moves  
             possibleMoves = new List<Moves>();
-            possibleMoves.Add(Moves.NO_ACTION);
-            possibleMoves.Add(Moves.ROLL_LEFT);
-            possibleMoves.Add(Moves.ROLL_RIGHT);
+            //possibleMoves.Add(Moves.ROLL_LEFT);
+            //possibleMoves.Add(Moves.ROLL_RIGHT);
             //possibleMoves.Add(Moves.JUMP);
-                          
+      
       
             //history keeping
             uncaughtCollectibles = new List<CollectibleRepresentation>();
@@ -102,20 +103,20 @@ namespace GeometryFriendsAgents
             uncaughtCollectibles = new List<CollectibleRepresentation>(collectiblesInfo);
             this.area = area;
 
+            world.add(obstaclesInfo); //static
+
+            world.addCircle(circleInfo);
+            world.addGoals(collectiblesInfo);
+
+            State initial_state = new State(circleInfo.X, circleInfo.Y, circleInfo.VelocityX, circleInfo.VelocityY);
+            s = initial_state;
+            g = new Graph(initial_state);
+
+
             //send a message to the rectangle informing that the circle setup is complete and show how to pass an attachment: a pen object
             messages.Add(new AgentMessage("Setup complete, testing to send an object as an attachment.", new Pen(Color.AliceBlue)));
 
-            //Init Map
-            mapa = new Grid();
-            int z = 0;
-            mapa.add(obstaclesInfo);
-            //mapa.add(circlePlatformsInfo);
-            //Init Graph
-            currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y);
-            grafo = new Graph(currentState);
-
-
-            DebugSensorsInfo();
+            //DebugSensorsInfo();
         }
 
         //implements abstract circle interface: registers updates from the agent's sensors that it is up to date with the latest environment information
@@ -160,7 +161,6 @@ namespace GeometryFriendsAgents
         {
             /*
              Circle Actions
-             NO_ACTION = 0
              ROLL_LEFT = 1      
              ROLL_RIGHT = 2
              JUMP = 3
@@ -172,6 +172,17 @@ namespace GeometryFriendsAgents
             messages.Add(new AgentMessage("Going to :" + currentAction));
         }
 
+        private void InformedAction()
+        {
+            foreach (Moves i in world.getCell(s.getX(), s.getY()).getPossibleMoves())
+            {
+                possibleMoves.Add(i);
+            }
+            
+            currentAction = possibleMoves[rnd.Next(possibleMoves.Count)];
+            //send a message to the rectangle agent telling what action it chose
+            messages.Add(new AgentMessage("Going to :" + currentAction));
+        }
         //implements abstract circle interface: GeometryFriends agents manager gets the current action intended to be actuated in the enviroment for this agent
         public override Moves GetAction()
         {
@@ -189,17 +200,10 @@ namespace GeometryFriendsAgents
             {
                 if (!(DateTime.Now.Second == 59))
                 {
-                    if (predicted_catch == false)
-                    {
-                        RandomAction();
-                        lastMoveTime = lastMoveTime + 1;
-                        //DebugSensorsInfo();
-                    }
-                    else
-                    {
-                        //keep current action
-                        lastMoveTime = lastMoveTime + 1;
-                    }                  
+                    //RandomAction();
+                    InformedAction();
+                    lastMoveTime = lastMoveTime + 1;
+                    //DebugSensorsInfo();                    
                 }
                 else
                     lastMoveTime = 60;
@@ -222,7 +226,6 @@ namespace GeometryFriendsAgents
                     foreach (CollectibleRepresentation item in toRemove)
                     {
                         uncaughtCollectibles.Remove(item);
-                        predicted_catch = false;
                     }
                 }
             }
@@ -265,7 +268,6 @@ namespace GeometryFriendsAgents
                     {
                         newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(item.X - debugCircleSize / 2, item.Y - debugCircleSize / 2), debugCircleSize, GeometryFriends.XNAStub.Color.Red));
                         newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(item.X, item.Y), "Predicted catch!", GeometryFriends.XNAStub.Color.White));
-                        predicted_catch = true;
                     }
                     //create additional debug information to visualize collectibles that have already been caught by the agent
                     foreach (CollectibleRepresentation item in caughtCollectibles)
@@ -286,8 +288,6 @@ namespace GeometryFriendsAgents
             Log.LogInformation("Circle Agent - " + rectangleInfo.ToString());
 
             Log.LogInformation("Circle Agent - " + circleInfo.ToString());
-
-            Log.LogInformation("Game Area - " + this.area);
 
             foreach (ObstacleRepresentation i in obstaclesInfo)
             {

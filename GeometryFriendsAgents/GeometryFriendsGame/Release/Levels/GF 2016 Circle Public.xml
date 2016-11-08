@@ -32,13 +32,6 @@
     <GreenElevators />
     <OrangeElevators />
     <TimeLimit value="160" />
-    <HighScores>
-      <HighScore name="No Name" value="131" />
-      <HighScore name="Dummy SuboalAI Circle" value="160" />
-      <HighScore name="Dummy SuboalAI Circle" value="160" />
-      <HighScore name="Dummy SuboalAI Circle" value="160" />
-      <HighScore name="Dummy SuboalAI Circle" value="160" />
-    </HighScores>
   </Level1>
   <Level2>
     <Description />
@@ -63,13 +56,6 @@
     <GreenElevators />
     <OrangeElevators />
     <TimeLimit value="130" />
-    <HighScores>
-      <HighScore name="No Name" value="94" />
-      <HighScore name="RandPredictorCircle" value="130" />
-      <HighScore name="Dummy SuboalAI Circle" value="130" />
-      <HighScore name="RandCircle" value="130" />
-      <HighScore name="RandCircle" value="130" />
-    </HighScores>
   </Level2>
   <Level3>
     <Description />
@@ -95,14 +81,7 @@
     </YellowObstacles>
     <GreenElevators />
     <OrangeElevators />
-    <TimeLimit value="55" />
-    <HighScores>
-      <HighScore name="Dummy SuboalAI Circle" value="55" />
-      <HighScore name="RandCircle" value="55" />
-      <HighScore name="LearningBall" value="55" />
-      <HighScore name="RandCircle" value="55" />
-      <HighScore name="RandPredictorCircle" value="55" />
-    </HighScores>
+	<TimeLimit value="55" />
   </Level3>
   <Level4>
     <Description />
@@ -129,13 +108,6 @@
     <GreenElevators />
     <OrangeElevators />
     <TimeLimit value="60" />
-    <HighScores>
-      <HighScore name="Dummy SuboalAI Circle" value="60" />
-      <HighScore name="RandCircle" value="60" />
-      <HighScore name="LearningBall" value="60" />
-      <HighScore name="RandCircle" value="60" />
-      <HighScore name="RandPredictorCircle" value="60" />
-    </HighScores>
   </Level4>
   <Level5>
     <Description />
@@ -163,12 +135,5 @@
     <GreenElevators />
     <OrangeElevators />
     <TimeLimit value="65" />
-    <HighScores>
-      <HighScore name="RandCircle" value="65" />
-      <HighScore name="RandPredictorCircle" value="65" />
-      <HighScore name="Dummy SuboalAI Circle" value="65" />
-      <HighScore name="RandPredictorCircle" value="65" />
-      <HighScore name="RandCircle" value="65" />
-    </HighScores>
   </Level5>
 </Levels>
