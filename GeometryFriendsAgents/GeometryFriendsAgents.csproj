@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Action.cs" />
     <Compile Include="Cell.cs" />
     <Compile Include="CircleAgent.cs" />
     <Compile Include="Edge.cs" />

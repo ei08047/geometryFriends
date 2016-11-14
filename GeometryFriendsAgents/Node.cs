@@ -10,7 +10,6 @@ namespace GeometryFriendsAgents
         private ArrayList _edges;
         private Node _parent;
         private State _state;
-        private Cell _cell;
 
         public Node()
         {
@@ -26,11 +25,7 @@ namespace GeometryFriendsAgents
             this._state = s;
         }
 
-        public Node(Cell c) {
-            this._edges = new ArrayList();
-            this._parent = null;
-            this._cell = c;
-        }
+
 
         public void addEdge(Node child, int action)
         {
@@ -42,16 +37,24 @@ namespace GeometryFriendsAgents
         {
             Edge newEdge = new Edge(this, child);
             this._edges.Add(newEdge);
-        }  
+        }
+
+        public Boolean isGoalNode(Node goal,float thresh)
+        {
+            float xDistance = this.getState().getX() - goal.getState().getX();
+            float yDistance = this.getState().getY() - goal.getState().getY();
+            float total = Math.Sqrt(Math.Pow(xDistance, 2) + Math.Pow(yDistance, 2);
+            if (total <= thresh)
+                return true;
+            else
+                return false;
+        }
 
         public State getState()
         {
             return _state;
         }
 
-        public Cell getCell() {
-            return _cell;
-        }
 
     }
 }

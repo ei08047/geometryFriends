@@ -2,3 +2,4 @@ C:\Users\José\Desktop\geometryFriends\GeometryFriendsAgents\GeometryFriendsGame
 C:\Users\José\Desktop\geometryFriends\GeometryFriendsAgents\GeometryFriendsGame\Release\Agents\Aiad.pdb
 C:\Users\José\Desktop\geometryFriends\GeometryFriendsAgents\obj\Debug\Aiad.dll
 C:\Users\José\Desktop\geometryFriends\GeometryFriendsAgents\obj\Debug\Aiad.pdb
+C:\Users\José\Desktop\geometryFriends\GeometryFriendsAgents\obj\Debug\GeometryFriendsAgents.csprojResolveAssemblyReference.cache

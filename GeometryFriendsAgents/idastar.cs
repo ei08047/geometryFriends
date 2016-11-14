@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using System.Text;
 using GeometryFriends.AI;
+
 namespace GeometryFriendsAgents
 {
     class idastar
@@ -41,7 +42,52 @@ namespace GeometryFriendsAgents
         //successors(node)  node expanding function
         public ArrayList successors() {
             ArrayList succ = new ArrayList();
-                return succ;
+            int i = 0;
+            while (i < 4)
+            {
+                switch (i)
+                {
+                    case 0:
+                        {
+
+                            break;
+                        }
+                    case 1:
+                        {
+                            break;
+                        }
+                    case 2:
+                        {
+                            break;
+                        }
+                    case 3:
+                        {
+                            break;
+                        }
+
+                }
+            }
+            //do nothing
+            /*
+            vH -> 0
+            vV -> 0
+             */
+            //roll r
+            /*
+             vx -> 140
+             */
+            //roll l
+            /*
+             vx -> -140
+            */
+            //jump
+            /*
+             if vy == 0
+             vy ++
+             */
+
+
+            return succ;
             }
         }
 

@@ -6,7 +6,7 @@ using GeometryFriends.AI.Perceptions.Information;
 
 
 namespace GeometryFriendsAgents
-{
+{ // not used
     class Goal
     {
 

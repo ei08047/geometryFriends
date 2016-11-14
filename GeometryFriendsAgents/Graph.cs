@@ -9,6 +9,7 @@ namespace GeometryFriendsAgents
     public class Graph
     {
         private ArrayList nodes;
+        public Plan p;
 
 
         public Graph()
@@ -26,24 +27,12 @@ namespace GeometryFriendsAgents
             this.nodes.Add(initialNode);
         }
 
-        public Graph(Cell inicial)
-        {
-            this.nodes = new ArrayList();
-            Node initialNode = new Node(inicial);
-
-            this.nodes.Add(initialNode);
-        }
-
-        public void addNode(Cell c) {
-            Node initialNode = new Node(c);
-            this.nodes.Add(initialNode);
-        }
-
-        public Node get_node()
+        public Node get_root()
         {
             Node temp = (Node)this.nodes[0];
             return temp;
         }
+
 
         public ArrayList getNodes() {
             return nodes;

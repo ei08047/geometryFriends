@@ -6,6 +6,7 @@ using GeometryFriends.AI.Debug;
 using GeometryFriends.AI.Interfaces;
 using GeometryFriends.AI.Perceptions.Information;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -33,7 +34,6 @@ namespace GeometryFriendsAgents
 
 
         //goal
-        Goal capturePoints;
         Path path;
 
         //debug agent predictions and history keeping
@@ -55,6 +55,11 @@ namespace GeometryFriendsAgents
 
         private List<AgentMessage> messages;
 
+        //plans
+        ArrayList plans = new ArrayList();
+        //goals
+        ArrayList goals = new ArrayList();
+
         //low level representation
         Grid world = new Grid();
         State s;
@@ -75,9 +80,9 @@ namespace GeometryFriendsAgents
 
             //prepare the possible moves  
             possibleMoves = new List<Moves>();
-            //possibleMoves.Add(Moves.ROLL_LEFT);
-            //possibleMoves.Add(Moves.ROLL_RIGHT);
-            //possibleMoves.Add(Moves.JUMP);
+            possibleMoves.Add(Moves.ROLL_LEFT);
+            possibleMoves.Add(Moves.ROLL_RIGHT);
+            possibleMoves.Add(Moves.JUMP);
       
       
             //history keeping
@@ -102,15 +107,31 @@ namespace GeometryFriendsAgents
             collectiblesInfo = colI;
             uncaughtCollectibles = new List<CollectibleRepresentation>(collectiblesInfo);
             this.area = area;
+            Log.LogInformation("area w: " + area.Width + "area h:" + area.Height);
+
+
+            //create goals
+            foreach (CollectibleRepresentation c in collectiblesInfo)
+            {
+                Goal t = new Goal(c);
+                goals.Add(t);
+            }
+
+            //create plans
+            foreach (Goal g in goals)
+            {
+                Plan pl = new Plan();
+                plans.Add(pl);
+            }
 
             world.add(obstaclesInfo); //static
-
             world.addCircle(circleInfo);
             world.addGoals(collectiblesInfo);
+            world.flood(1);
+            //world.createGraph();
 
-            State initial_state = new State(circleInfo.X, circleInfo.Y, circleInfo.VelocityX, circleInfo.VelocityY);
-            s = initial_state;
-            g = new Graph(initial_state);
+            State inicial = new State(circleInfo.VelocityX , circleInfo.VelocityY , circleInfo.X , circleInfo.Y);
+            Graph p = new Graph(inicial);
 
 
             //send a message to the rectangle informing that the circle setup is complete and show how to pass an attachment: a pen object
@@ -174,12 +195,27 @@ namespace GeometryFriendsAgents
 
         private void InformedAction()
         {
-            foreach (Moves i in world.getCell(s.getX(), s.getY()).getPossibleMoves())
+            Cell current = world.getCell(world.widthToCells(circleInfo.X),  world.heightToCells( circleInfo.Y));
+            float xV = current.getVectorX();
+            float yV = current.getVectorY();
+
+            float xReal = circleInfo.VelocityX;
+            float yReal = circleInfo.VelocityY;
+
+
+            Log.LogInformation("current x vector" + current.getVectorX());
+            Log.LogInformation("current y vector" + current.getVectorY());
+            Log.LogInformation("real x vector" + xReal);
+            Log.LogInformation("real y vector" + yReal);
+
+            float d = xReal * xV;
+            if (d >= 0)
             {
-                possibleMoves.Add(i);
+                currentAction = Moves.ROLL_LEFT;
             }
-            
-            currentAction = possibleMoves[rnd.Next(possibleMoves.Count)];
+            else
+                currentAction = Moves.ROLL_RIGHT;
+            //currentAction = possibleMoves[rnd.Next(possibleMoves.Count)];
             //send a message to the rectangle agent telling what action it chose
             messages.Add(new AgentMessage("Going to :" + currentAction));
         }
@@ -200,8 +236,8 @@ namespace GeometryFriendsAgents
             {
                 if (!(DateTime.Now.Second == 59))
                 {
-                    //RandomAction();
                     InformedAction();
+
                     lastMoveTime = lastMoveTime + 1;
                     //DebugSensorsInfo();                    
                 }
@@ -273,7 +309,18 @@ namespace GeometryFriendsAgents
                     foreach (CollectibleRepresentation item in caughtCollectibles)
                     {
                         newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(item.X - debugCircleSize / 2, item.Y - debugCircleSize / 2), debugCircleSize, GeometryFriends.XNAStub.Color.GreenYellow));
-                    }                 
+                    }
+
+                    //create grid debug information
+                    
+                    ArrayList n = new ArrayList();
+                    foreach (Cell c in world.getFreeCells() )
+                    {
+                        newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(world.CelltoWidth(c.pos[0]), world.CelltoHeight(c.pos[1])), c.value.ToString(), GeometryFriends.XNAStub.Color.White));
+                    }
+                    
+
+                    
                     //set all the debug information to be read by the agents manager
                     debugInfo = newDebugInfo.ToArray();                    
                 }

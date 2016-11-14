@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections;
 
 namespace GeometryFriendsAgents
-{
+{ // not used
     class Path
     {
         public ArrayList _path;

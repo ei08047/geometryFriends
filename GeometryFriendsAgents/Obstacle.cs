@@ -5,6 +5,7 @@ using System.Text;
 
 namespace GeometryFriendsAgents
 {
+    //not used
     public class Obstacle
     {
         Position v1, v2, v3, v4;

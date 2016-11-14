@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,11 +7,16 @@ using System.Text;
 
 
 namespace GeometryFriendsAgents
-{
-    class Plan
+{ // not used
+    public class Plan
     {
-       //ArrayList[i] Path
-        
-        
+        ArrayList free = new ArrayList();
+        State goal;
+        //ArrayList[i] Path
+
+        public Plan()
+        {
+
+        }
     }
 }
