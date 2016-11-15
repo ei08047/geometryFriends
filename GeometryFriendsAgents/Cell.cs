@@ -10,42 +10,23 @@ namespace GeometryFriendsAgents
     {
         public int id;
         public int value;
-        public String drawable="";
         public int[] pos = new int[2];
         public int[] vector = new int[2];
 
-        public Boolean roof = false; // means you might have a top colision
-        public Boolean floor = false; // means you can jump
+        public Boolean roof = false; // means you might have a top colision       not used
+        public Boolean floor = false; // means you can jump                       not used
 
-        public Boolean seen = false;
+        public Boolean seen = false;  // not used
 
-        public Boolean circle = false;
-        public Boolean square = false;
         public Boolean goal = false;
-        public Boolean obstacle = false;
+        public Boolean obstacle = false; 
 
-        public Boolean edge = false;
+        public Boolean edge = false;  // not implemented
 
         public Cell()
         {
         }
 
-        public String getDrawable()
-        {
-            if (circle)
-            {
-                drawable = "C";
-            }
-            if (goal)
-            {
-                drawable = "G";
-            }
-            else
-            {
-                drawable = value.ToString();
-            }
-            return drawable;
-        }
 
         public void set_value(int val)
         {
@@ -87,14 +68,8 @@ namespace GeometryFriendsAgents
 
         public void set_goal(Boolean val) {
             goal = val;
-            drawable = "G";
         }
 
-        public void set_circle(Boolean val)
-        {
-            circle = val;
-            drawable = "C";
-        }
 
         public void incVal(int v)
         {

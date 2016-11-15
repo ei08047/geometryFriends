@@ -9,7 +9,6 @@ namespace GeometryFriendsAgents
     public class Graph
     {
         private ArrayList nodes;
-        public Plan p;
 
 
         public Graph()
@@ -17,7 +16,6 @@ namespace GeometryFriendsAgents
             this.nodes = new ArrayList();
         }
 
-       
 
         public Graph(State inicial)
         {
@@ -26,6 +24,8 @@ namespace GeometryFriendsAgents
 
             this.nodes.Add(initialNode);
         }
+
+
 
         public Node get_root()
         {

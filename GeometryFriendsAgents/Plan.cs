@@ -10,13 +10,48 @@ namespace GeometryFriendsAgents
 { // not used
     public class Plan
     {
-        ArrayList free = new ArrayList();
-        State goal;
-        //ArrayList[i] Path
+        ArrayList path = new ArrayList();
+        Grid worldRep;
+        ArrayList actions = new ArrayList();
+        Graph p;
+        Goal goal;
+        Position agentPos;
+        int value;
+        Boolean active = false;
+        int order;
+        int collaborative;
+
 
         public Plan()
         {
+        }
+
+
+
+        public void setgoal(Goal g) {
+            goal = g;
+        }
+
+        public void setWorld(Grid w) {
+            worldRep = w;
+        }
+
+        public void buildPath() {
+            ArrayList agent = new ArrayList();
+            agent = worldRep.locate(agentPos);
+            // if agent not in world.freeCells
+                //dont exist
+                //else it does
+                //if any path with h > maxhAgent
+                    //find another
+                    
+        }
+
+        public void setAction()
+        {
 
         }
+
+        void evaluate(State value) { return; }
     }
 }

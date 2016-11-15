@@ -14,7 +14,6 @@ namespace GeometryFriendsAgents
         public Cell[,] grid = new Cell[40, 40];
         public ArrayList obstacles = new ArrayList();
         public ArrayList emptyCells = new ArrayList();
-        public ArrayList goals = new ArrayList();
 
 
         public Grid() {
@@ -42,7 +41,7 @@ namespace GeometryFriendsAgents
                     return c;
             }
             return null;
-        }
+        }   
 
         public void add(ObstacleRepresentation[] obs)
         {
@@ -64,26 +63,26 @@ namespace GeometryFriendsAgents
             }
         }
 
-        public void addCircle(CircleRepresentation circle) {
-            int x = widthToCells (circle.X);
-            int y = heightToCells( circle.Y);
-            getCell(x, y).set_circle(true);
-            Log.LogInformation("Circle created on"+ "  x:" +x + " y:" + y );
-        }
-
-        public void flood(int goalId) {
+        public void flood(Goal goal) {
 
             Log.LogInformation("start flood");
             int i = 1; // value increment
             ArrayList freeCells = getFreeCells();
+            ArrayList viz= new ArrayList(); // h.getKViz(freeCells, i);
             // starting at goal cell
-            Cell c = getCellbyId(goalId);
-            c.set_value(0);
-            c.seen = true;
-            // find neighboors
-            ArrayList viz = c.getKViz(freeCells, i);
+            // Cell c = getCellbyId(goalId);
+            ArrayList g = locate(goal.getPosition() );
+            foreach (Cell h in g)
+            {
+                h.set_value(0);
+                h.seen = true;
+                // find neighboors
+                viz = h.getKViz(freeCells, i);
+                freeCells.Remove(h);
+                //if not there already add to A list
+            }
+
             ArrayList nextViz = new ArrayList();
-            freeCells.Remove(c);
             ArrayList availableCells = freeCells;
             
             while (availableCells.Count != 0)
@@ -113,6 +112,14 @@ namespace GeometryFriendsAgents
             }
             freeCells = getFreeCells();
             calculateVectors(freeCells);
+        }
+
+        public void clear()
+        {
+            foreach (Cell e in emptyCells)
+            {
+                e.set_value(0);
+            }
         }
 
         public void calculateVectors(ArrayList free) {
@@ -232,22 +239,16 @@ namespace GeometryFriendsAgents
 
         }
 */
-        public void addGoals(CollectibleRepresentation[] goals) {
-            int i = 0;
-            foreach (CollectibleRepresentation g in goals)
-            {
-                int gridX = widthToCells(g.X);
-                int gridY = heightToCells(g.Y);
-                addObjective(gridX , gridY, i);
-                i++;
-                Log.LogInformation("Goal created in " + "x:"+gridX + " y:"+ gridY);
-            }
-        }
 
-        public void addObjective(int i, int j,int id) {
-            getCell(j,i).set_goal(true);
-            getCell(j,i).set_id(id);
-            goals.Add(getCell(j,i));
+
+        public ArrayList locate(Position p) {
+            ArrayList ret = new ArrayList(); 
+            int i, j;
+            i = widthToCells(p.x);
+            j = heightToCells(p.y);
+            ret.Add(getCell(i, j)); //TODO
+            return ret;
+        
         }
 
         public void setEmptyCells() {

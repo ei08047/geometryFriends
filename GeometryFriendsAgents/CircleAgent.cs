@@ -109,6 +109,8 @@ namespace GeometryFriendsAgents
             this.area = area;
             Log.LogInformation("area w: " + area.Width + "area h:" + area.Height);
 
+            //create world
+            world.add(obstaclesInfo); //static
 
             //create goals
             foreach (CollectibleRepresentation c in collectiblesInfo)
@@ -121,14 +123,26 @@ namespace GeometryFriendsAgents
             foreach (Goal g in goals)
             {
                 Plan pl = new Plan();
+
+                pl.setgoal(g);
+                //flood this goal
+                world.flood(g);
+                //copy world rep for goal
+                pl.setWorld(world);
+                //reset values
+                world.clear();
                 plans.Add(pl);
             }
 
-            world.add(obstaclesInfo); //static
-            world.addCircle(circleInfo);
-            world.addGoals(collectiblesInfo);
-            world.flood(1);
-            //world.createGraph();
+            //order or remove plans
+
+            //Generate graph
+
+            //find path
+            //evaluate path
+            //comunicate
+            //negociate
+            //update plan status
 
             State inicial = new State(circleInfo.VelocityX , circleInfo.VelocityY , circleInfo.X , circleInfo.Y);
             Graph p = new Graph(inicial);
