@@ -4,6 +4,7 @@ using GeometryFriends.AI.Communication;
 using GeometryFriends.AI.Interfaces;
 using GeometryFriends.AI.Perceptions.Information;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -16,13 +17,15 @@ namespace GeometryFriendsAgents
     {
         //agent implementation specificiation
         private bool implementedAgent;
-        private string agentName = "RandRect";
+        private string agentName = "myRectangle";
 
         //auxiliary variables for agent action
         private Moves currentAction;
         private List<Moves> possibleMoves;
         private long lastMoveTime;
         private Random rnd;
+
+        //predictor of actions for the rectangle TODO:
 
         //Sensors Information
         private CountInformation numbersInfo;
@@ -36,6 +39,16 @@ namespace GeometryFriendsAgents
         private int nCollectiblesLeft;
 
         private List<AgentMessage> messages;
+
+        //plans
+        ArrayList plans = new ArrayList();
+        //goals
+        ArrayList goals = new ArrayList();
+
+        //low level representation
+        Grid gridWorld = new Grid();
+        State currentState;
+
 
         //Area of the game screen
         protected Rectangle area;
@@ -72,6 +85,55 @@ namespace GeometryFriendsAgents
             circlePlatformsInfo = cPI;
             collectiblesInfo = colI;
             this.area = area;
+
+            //create gridWorld
+            gridWorld.add(obstaclesInfo); //static
+            gridWorld.add(circlePlatformsInfo); //static
+            gridWorld.setEmptyCells();
+            gridWorld.setFloor();
+            gridWorld.setAdjMatrix();
+
+
+            //set agent state
+            currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y);
+            Cell AgentCell = gridWorld.locate(currentState);
+
+            //Generate graph
+            Graph gr = new Graph(gridWorld);
+            int noNodes = gr.addNodes();
+            GeometryFriends.Log.LogInformation(noNodes + "nodes were created");
+            int noEdges = gr.createEdges();
+            GeometryFriends.Log.LogInformation(noEdges + "edges were created");
+
+            //create goals
+            int goalId = 0;
+            foreach (CollectibleRepresentation c in collectiblesInfo)
+            {
+                Goal t = new Goal(c, goalId);
+                Log.LogInformation("created goal: " + goalId + "  on position: " + c.X + " --" + c.X);
+                goalId++;
+                goals.Add(t);
+            }
+            //create plans
+            foreach (Goal g in goals)
+            {
+                //reset values
+                gridWorld.clear();
+                Plan pl = new Plan();
+                pl.setgoal(g);
+
+                Log.LogInformation("created plan for goal -" + g.id + "in: " + g.goal.getX() + ":" + g.goal.getY());
+                //flood this goal
+                gridWorld.flood(g);
+                gridWorld.setEmptyCells();
+                //copy gridWorld rep for goal
+                pl.setGridWorld(gridWorld);
+                pl.setAgent(currentState);
+                pl.setGraph(gr);
+                //find path
+                pl.buildPath();
+                plans.Add(pl);
+            }
 
             //send a message to the rectangle informing that the circle setup is complete and show how to pass an attachment: a pen object
             messages.Add(new AgentMessage("Setup complete, testing to send an object as an attachment.", new Pen(Color.BlanchedAlmond)));

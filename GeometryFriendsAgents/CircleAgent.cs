@@ -19,7 +19,7 @@ namespace GeometryFriendsAgents
     {
         //agent implementation specificiation
         private bool implementedAgent;
-        private string agentName = "RandPredictorCircle";
+        private string agentName = "myCircle";
 
         //auxiliary variables for agent action
         private Moves currentAction;
@@ -31,10 +31,6 @@ namespace GeometryFriendsAgents
         private ActionSimulator predictor = null;
         private DebugInformation[] debugInfo = null;
         private int debugCircleSize = 20;
-
-
-        //goal
-        Path path;
 
         //debug agent predictions and history keeping
         private List<CollectibleRepresentation> caughtCollectibles;
@@ -61,9 +57,8 @@ namespace GeometryFriendsAgents
         ArrayList goals = new ArrayList();
 
         //low level representation
-        Grid world = new Grid();
-        State s;
-        Graph g;
+        Grid gridWorld = new Grid();
+        State currentState;
 
         //Area of the game screen
         private Rectangle area;
@@ -109,43 +104,67 @@ namespace GeometryFriendsAgents
             this.area = area;
             Log.LogInformation("area w: " + area.Width + "area h:" + area.Height);
 
-            //create world
-            world.add(obstaclesInfo); //static
+            //create gridWorld
+            gridWorld.add(obstaclesInfo); //static
+            gridWorld.add(rectanglePlatformsInfo); //static
+            gridWorld.setEmptyCells();
+            gridWorld.setFloor();
+            gridWorld.setAdjMatrix();
+
+            //set agent state
+            currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y);
+            Cell AgentCell = gridWorld.locate(currentState);
+
+            //Generate graph
+            Graph gr = new Graph( gridWorld)    ;
+            int noNodes = gr.addNodes();
+            GeometryFriends.Log.LogInformation(noNodes + "nodes were created");
+            int noEdges = gr.createEdges();
+            GeometryFriends.Log.LogInformation(noEdges + "edges were created");
 
             //create goals
-            foreach (CollectibleRepresentation c in collectiblesInfo)
-            {
-                Goal t = new Goal(c);
+            int goalId = 0;
+            foreach (CollectibleRepresentation c in collectiblesInfo) {
+                Goal t = new Goal(c, goalId);
+                Log.LogInformation("created goal: " + goalId + "  on position: " + c.X + " --" + c.X);
+                goalId++;
                 goals.Add(t);
             }
-
             //create plans
             foreach (Goal g in goals)
             {
-                Plan pl = new Plan();
-
-                pl.setgoal(g);
-                //flood this goal
-                world.flood(g);
-                //copy world rep for goal
-                pl.setWorld(world);
                 //reset values
-                world.clear();
+                gridWorld.clear();
+                Plan pl = new Plan();
+                pl.setgoal(g);
+                
+                Log.LogInformation("created plan for goal -" + g.id + "in: "+ g.goal.getX() + ":" + g.goal.getY());
+                //flood this goal
+                gridWorld.flood(g);
+                gridWorld.setEmptyCells();
+                //copy gridWorld rep for goal
+                pl.setGridWorld(gridWorld);
+                pl.setAgent(currentState);
+                pl.setGraph(gr);
+                //find path
+                pl.buildPath();
                 plans.Add(pl);
             }
-
-            //order or remove plans
-
-            //Generate graph
-
-            //find path
             //evaluate path
+
+            int order = 0;
+            //order or remove plans
+            foreach (Plan pla in plans)
+            {
+                pla.order = order;
+                Log.LogInformation("got a plan with order:" + pla.order + "|| with path size:" + pla.path._path.Count);
+                
+            }
+
             //comunicate
             //negociate
             //update plan status
 
-            State inicial = new State(circleInfo.VelocityX , circleInfo.VelocityY , circleInfo.X , circleInfo.Y);
-            Graph p = new Graph(inicial);
 
 
             //send a message to the rectangle informing that the circle setup is complete and show how to pass an attachment: a pen object
@@ -161,7 +180,6 @@ namespace GeometryFriendsAgents
         public override void SensorsUpdated(int nC, RectangleRepresentation rI, CircleRepresentation cI, CollectibleRepresentation[] colI)
         {
             nCollectiblesLeft = nC;
-
             rectangleInfo = rI;
             circleInfo = cI;
             collectiblesInfo = colI;
@@ -169,7 +187,7 @@ namespace GeometryFriendsAgents
             {
                 remaining = new List<CollectibleRepresentation>(collectiblesInfo);
             }
-
+            //TODO: update beliefs
             //DebugSensorsInfo();
         }
 
@@ -209,27 +227,30 @@ namespace GeometryFriendsAgents
 
         private void InformedAction()
         {
-            Cell current = world.getCell(world.widthToCells(circleInfo.X),  world.heightToCells( circleInfo.Y));
-            float xV = current.getVectorX();
-            float yV = current.getVectorY();
+            Cell current = gridWorld.getCell(gridWorld.widthToCells(circleInfo.X),  gridWorld.heightToCells( circleInfo.Y));
+            //float xV = current.getVectorX();
+            //float yV = current.getVectorY();
 
             float xReal = circleInfo.VelocityX;
             float yReal = circleInfo.VelocityY;
 
 
-            Log.LogInformation("current x vector" + current.getVectorX());
-            Log.LogInformation("current y vector" + current.getVectorY());
-            Log.LogInformation("real x vector" + xReal);
-            Log.LogInformation("real y vector" + yReal);
-
+            //Log.LogInformation("current x vector" + current.getVectorX());
+            //Log.LogInformation("current y vector" + current.getVectorY());
+            //Log.LogInformation("real x vector" + xReal);
+            //Log.LogInformation("real y vector" + yReal);
+            /*
             float d = xReal * xV;
             if (d >= 0)
             {
+                */
                 currentAction = Moves.ROLL_LEFT;
+            /*
             }
             else
                 currentAction = Moves.ROLL_RIGHT;
             //currentAction = possibleMoves[rnd.Next(possibleMoves.Count)];
+            */
             //send a message to the rectangle agent telling what action it chose
             messages.Add(new AgentMessage("Going to :" + currentAction));
         }
@@ -325,15 +346,14 @@ namespace GeometryFriendsAgents
                         newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(item.X - debugCircleSize / 2, item.Y - debugCircleSize / 2), debugCircleSize, GeometryFriends.XNAStub.Color.GreenYellow));
                     }
 
-                    //create grid debug information
-                    
+                    //create grid debug information // TODO : replace by vector
                     ArrayList n = new ArrayList();
-                    foreach (Cell c in world.getFreeCells() )
+                    foreach (Cell c in gridWorld.getFreeCells() )
                     {
-                        newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(world.CelltoWidth(c.pos[0]), world.CelltoHeight(c.pos[1])), c.value.ToString(), GeometryFriends.XNAStub.Color.White));
+                        newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), c.value.ToString(), GeometryFriends.XNAStub.Color.White));
+                       // newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), gridWorld.CelltoWidth(c.pos[0]).ToString() , GeometryFriends.XNAStub.Color.White));
                     }
                     
-
                     
                     //set all the debug information to be read by the agents manager
                     debugInfo = newDebugInfo.ToArray();                    

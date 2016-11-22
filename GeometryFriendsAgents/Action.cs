@@ -4,19 +4,16 @@ using System.Linq;
 using System.Text;
 
 namespace GeometryFriendsAgents
-{ // not used
+{ // TODO
     public class Action
     {
         State inicial, expected, final;
         GeometryFriends.AI.Moves move;
         GeometryFriends.XNAStub.GameTime iniciated;
 
-        public Action(State init, int move) {
-
+        public Action(State init, GeometryFriends.AI.Moves move) {
         }
-
-        public void calculateExpected() { }
-
+        public State calculateExpected() { return expected; }
 
 
 

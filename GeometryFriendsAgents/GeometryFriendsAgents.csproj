@@ -49,11 +49,12 @@
     <Compile Include="Cell.cs" />
     <Compile Include="CircleAgent.cs" />
     <Compile Include="Edge.cs" />
+    <Compile Include="Greedy.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Goal.cs" />
     <Compile Include="Graph.cs" />
     <Compile Include="Grid.cs" />
-    <Compile Include="idastar.cs" />
+    <Compile Include="Idastar.cs" />
     <Compile Include="Obstacle.cs" />
     <Compile Include="Path.cs" />
     <Compile Include="Plan.cs" />
