@@ -1,0 +1,11 @@
+ _ __             _   _      _        
+| '_ \  __ _ _ __| |_(_) ___| | ___ 
+| |_) |/ _` | '__| __| |/ __| |/ _ \
+|  __/| (_| | |  | |_| | (__| |  __/
+|_|    \__,_|_|   \__|_|\___|_|\___|
+                 https://particle.io
+
+> Setup is easy! Let's get started...
+> It appears as though you are already logged in as josemcf89@gmail.com
+? Would you like to log in with a different account? (y/N) [59D[59C
+

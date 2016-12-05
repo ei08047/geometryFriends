@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GeometryFriends;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +18,10 @@ namespace GeometryFriendsAgents
         public State agent;
         //public int value =100; //TODO
         //Boolean active = false; //TODO
-        public int order; 
-        //int collaborative; //TODO
-
+        public int order = 0;
+        public Boolean finished = false;
+        public Boolean active = false;
+        public Boolean collaborative=false; 
 
         public Plan()
         {
@@ -27,10 +29,6 @@ namespace GeometryFriendsAgents
         /// <summary>
         /// getters e setters
         /// </summary>
-        public void setAction()
-        {
-
-        }
         public void setgoal(Goal g) {
             goal = g;
         }
@@ -40,7 +38,6 @@ namespace GeometryFriendsAgents
         public void setAgent(State a) {
             agent = a;
         }
-
         public void setGraph(Graph p)
         {
             this.p = p;
@@ -48,16 +45,13 @@ namespace GeometryFriendsAgents
         /// <summary>
         /// graph building, pathfinding
         /// </summary>
-        public void updatePlan() {
-
+        public void updatePlan(State newState) {
+            agent = newState;
         }
-
         public void buildPath() {
             Cell goalCell = worldRep.locate(goal.getState());
             Cell agentCell = worldRep.locate(agent.getState());
-            GeometryFriends.Log.LogError("build path debug -- free cells:" + worldRep.emptyCells.Count);
-            GeometryFriends.Log.LogError("build path debug -- agent cell:" + agentCell.id);
-            GeometryFriends.Log.LogError("build path debug -- goal cell:" + goalCell.id);
+            //agent not in reach
             if (!worldRep.emptyCells.Contains(agentCell))
             {
                 GeometryFriends.Log.LogError(" didnt found path");
@@ -66,19 +60,55 @@ namespace GeometryFriendsAgents
             {
                 p.prepareSearch(p.getNodeByCellId(goalCell.id),p.getNodeByCellId(agentCell.id),this.worldRep);
                 this.path =  p.astar.search();
-            }
+                if (path == null)
+                {
+                    GeometryFriends.Log.LogError(" didnt found path");
+                    collaborative = true;
                     
+                }
+
+            }
+
         }
-        public void executePlan()
+        public Boolean finishedPlan() {
+            return finished;
+        }
+        public Action executePlan()
         {
+            Log.LogError("executing plan");
+            Node current = p.getNodeByCellId(worldRep.locate(agent).id);
+            Node nextNode = null;
+            Log.LogError("located agent at:" + current.cellId + " type " + worldRep.getCellbyId(current.cellId).floor);
+            current.eval(this.worldRep);
+            int currentVal = current.value;
+            int i =path.Locate(current); // very likely to happen
+            path.setIndex(i);
+            if (path.currentNodeIndex < 0)
+            {
+                Log.LogError("finished path");
+            }
+            else {
+                nextNode = path.getNextNode();
+                Log.LogError("got plan next node at:" + nextNode.cellId);
+            }
+            if (i == -1)
+            {
+                Log.LogError("could not locate ");
+                ArrayList _p = path.path;
+                 p.prepareSearch_path(_p,current,worldRep);
+                p.prepareSearch(nextNode, current, this.worldRep);
+                Path anotherPath = p.astar.search();
+                path.addPath(current , nextNode , anotherPath);
+                return current.getEdge(nextNode);
 
+            }
+            else
+            {
+                Log.LogError("located in plan ");
+                Log.LogError("got plan state index:"  + this.path.currentNodeIndex);
+                //try ti find a edge
+                return current.getEdge(nextNode);
+            }
         }
-
-/*
-        void evaluatePlan() {
-            if (path == null)
-                value = 0; 
-        }
-        */
     }
 }

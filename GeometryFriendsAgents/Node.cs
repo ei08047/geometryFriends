@@ -6,15 +6,22 @@ using System.Text;
 
 namespace GeometryFriendsAgents
 {
-    public class Node
+    public class Node : IComparable
     {
+        public int value;
         private ArrayList _edges;
         private Node _parent;
         private State _state;
         public int cellId;
-        public Dictionary<int, int> adj = new Dictionary<int, int>();
+        public Dictionary<int, Action> adj = new Dictionary<int, Action>();
 
-        public Node()
+
+
+
+
+
+
+    public Node()
         {
             this._edges = new ArrayList();
             this._parent = null;
@@ -33,6 +40,12 @@ namespace GeometryFriendsAgents
             this._state = s;
             this.cellId = cell;
         }
+        public void eval(Grid rep)
+        {
+            Cell c = rep.getCellbyId(cellId);
+            this.value = c.value; //TODO:deal with STATE
+        }
+
         public State getState()
         {
             return _state;
@@ -41,14 +54,23 @@ namespace GeometryFriendsAgents
         {
             return _edges;
         }
-        public void addEdge(Node child, float weight)
+        public Action getEdge(Node dest)
         {
-            Edge newEdge = new Edge(this, child, weight);
-            this._edges.Add(newEdge);
+            foreach (Edge e in _edges)
+            {
+                if (e.getChild().cellId == dest.cellId)
+                {
+                    GeometryFriends.Log.LogError("Found ONE", false);
+                    return e.getAction();
+                }
+            }
+            GeometryFriends.Log.LogError("COULD NOT FIND THAT EDGE ", false);
+            return null;
         }
-        public void addEdge(Node child)
+
+        public void addEdge(Node child, Action a)
         {
-            Edge newEdge = new Edge(this, child);
+            Edge newEdge = new Edge(this, child, a);
             this._edges.Add(newEdge);
         }
         public Boolean isGoalNode(Node goal,float thresh)
@@ -62,6 +84,9 @@ namespace GeometryFriendsAgents
                 return false;
         }
 
-
+        public int CompareTo(object obj)
+        {
+            return value.CompareTo(obj);
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using GeometryFriends.AI.Perceptions.Information;
 using System.Collections.Generic;
+using GeometryFriends;
 
 namespace GeometryFriendsAgents
 {
@@ -12,7 +13,6 @@ namespace GeometryFriendsAgents
         public ArrayList nodes;
         public Grid disRep;
         public Path path;
-        public Greedy greedy;
         public Idastar astar;
 
 
@@ -59,7 +59,6 @@ namespace GeometryFriendsAgents
             Node temp = (Node)this.nodes[0];
             return temp;
         }
-
         public void addnode(Node n)
         {
             nodes.Add(n);
@@ -73,8 +72,8 @@ namespace GeometryFriendsAgents
                 {
                     try
                     {
-                        int id = Convert.ToUInt16( c.adj_id[i]);
-                        int val = Convert.ToUInt16( c.adj_fc[i]);
+                        int id = (int)( c.adj_id[i]);
+                        Action val = new Action(n.getState(), (GeometryFriends.AI.Moves) c.adj_action[i] );
                         n.adj.Add(id, val );
                     }
                     catch (Exception e)
@@ -94,7 +93,7 @@ namespace GeometryFriendsAgents
             int noEdges = 0;
             foreach (Node n in getNodes())
             {
-                foreach (KeyValuePair<int, int> entry in n.adj)
+                foreach (KeyValuePair<int, Action> entry in n.adj)
                 {
                     n.addEdge(getNodeByCellId(entry.Key), entry.Value);
                     noEdges++;
@@ -108,6 +107,53 @@ namespace GeometryFriendsAgents
             astar = new Idastar( a, g, rep, this);
         }
 
+        public void prepareSearch_path(ArrayList path, Node curr, Grid rep)
+        {
+            foreach (Node p in path)
+            {
+                if (!(curr.value > p.value))
+                {
+                    prepareSearch(p, curr, rep);
+                } 
+            }
+        }
+
+        public void InitValGraph()
+        {
+            foreach (Node n in nodes)
+            {
+                n.value = this.disRep.getCellbyId(n.cellId).value;
+            }
+        }
+
+        public void sortGraph()
+        {
+            nodes.Sort();
+        }
+
+
+        public void pruneGraph(Node value)
+        {
+            foreach (Node outVal in nodes)
+            {
+                try
+                {
+                    if (outVal == value )
+                    {
+                        nodes.Remove(outVal);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.LogError(e.Message);
+                }
+                { }
+              
+            }
+        }
+        
+            //TODO: need to remove impossible jumps
+        
 
 
 

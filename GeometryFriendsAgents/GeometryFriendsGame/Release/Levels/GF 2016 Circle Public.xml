@@ -35,6 +35,8 @@
     <HighScores>
       <HighScore name="No Name" value="110" />
       <HighScore name="RandPredictorCircle" value="160" />
+      <HighScore name="myCircle" value="160" />
+      <HighScore name="myCircle" value="160" />
       <HighScore name="RandPredictorCircle" value="160" />
     </HighScores>
   </Level1>
@@ -92,6 +94,7 @@
     <OrangeElevators />
     <TimeLimit value="55" />
     <HighScores>
+      <HighScore name="myCircle" value="55" />
       <HighScore name="RandPredictorCircle" value="55" />
       <HighScore name="RandPredictorCircle" value="65" />
     </HighScores>

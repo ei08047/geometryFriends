@@ -14,6 +14,7 @@ namespace GeometryFriendsAgents
         public Cell[,] grid = new Cell[40, 40];
         public ArrayList obstacles = new ArrayList();
         public ArrayList emptyCells = new ArrayList();
+        string agentName;
         public Grid() {
             int id = 0;
             for (int i = 0; i < 40; i++)
@@ -102,7 +103,7 @@ namespace GeometryFriendsAgents
             return nodes;
         }
         //setters
-
+        public void setAgent(string name) { this.agentName = name; }
         public void add(ObstacleRepresentation[] obs)
         {
             foreach (ObstacleRepresentation o in obs)
@@ -213,14 +214,33 @@ namespace GeometryFriendsAgents
                 {
                     if (getDown(c).obstacle)
                         c.floor = true;
+                    if(c.getY() > 20)
+                        c.floor = true;
                 }
                 catch (Exception e)
                 {
                     {
-                        Console.WriteLine("An error occurred: '{0}'", e);
+                        Console.WriteLine("An error occurred setting floor: '{0}'", e);
                     }
 
                 }
+            }
+        }
+        public void setEdges() {
+            foreach (Cell c in grid)
+            {
+                try
+                {
+                    if (getLeft(c).obstacle || getRight(c).obstacle)
+                    {
+                        c.edge = true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("An error occurred setting floor: '{0}'", e);
+                }
+                
             }
         }
         public void setEmptyCells() {
@@ -233,10 +253,17 @@ namespace GeometryFriendsAgents
         public void setAdjMatrix() {
           
             foreach (Cell c in emptyCells)
-            {
-                c.setAdj(this.emptyCells);
+             
+                
+                if (agentName == "myCircle")
+                {
+                    c.setAdjCircle(this.emptyCells);
+                }
+                else
+                {
+                    c.setAdjRectangle(this.emptyCells);
+                }
             }
-        }
         public void add_grid_obstacle(int xi, int xf, int yi, int yf)
         {
             int xDiff = xf - xi;

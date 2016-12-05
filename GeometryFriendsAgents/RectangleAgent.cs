@@ -1,6 +1,8 @@
 ﻿using GeometryFriends;
 using GeometryFriends.AI;
+using GeometryFriends.AI.ActionSimulation;
 using GeometryFriends.AI.Communication;
+using GeometryFriends.AI.Debug;
 using GeometryFriends.AI.Interfaces;
 using GeometryFriends.AI.Perceptions.Information;
 using System;
@@ -26,6 +28,15 @@ namespace GeometryFriendsAgents
         private Random rnd;
 
         //predictor of actions for the rectangle TODO:
+        private ActionSimulator predictor = null;
+        private DebugInformation[] debugInfo = null;
+        private int debugCircleSize = 20;
+
+        //debug agent predictions and history keeping
+        private List<CollectibleRepresentation> caughtCollectibles;
+        private List<CollectibleRepresentation> uncaughtCollectibles;
+        private object remainingInfoLock = new Object();
+        private List<CollectibleRepresentation> remaining;
 
         //Sensors Information
         private CountInformation numbersInfo;
@@ -40,13 +51,18 @@ namespace GeometryFriendsAgents
 
         private List<AgentMessage> messages;
 
+        Graph gr;
+
         //plans
         ArrayList plans = new ArrayList();
+        Plan currentPlan;
+        Action nextAction;
         //goals
         ArrayList goals = new ArrayList();
 
         //low level representation
         Grid gridWorld = new Grid();
+       
         State currentState;
 
 
@@ -73,6 +89,53 @@ namespace GeometryFriendsAgents
             messages = new List<AgentMessage>();
         }
 
+        public void initGrid() {
+            gridWorld.setAgent(this.agentName);
+            if (this.agentName == "myRectangle")
+            {
+
+                gridWorld.add(obstaclesInfo); //static
+                gridWorld.add(circlePlatformsInfo); //static
+            }
+            else
+            {
+
+                gridWorld.add(obstaclesInfo); //static
+                gridWorld.add(rectanglePlatformsInfo); //static
+            }
+            gridWorld.setEmptyCells();
+            gridWorld.setFloor();
+            gridWorld.setEdges();
+            gridWorld.setAdjMatrix();
+        }
+
+        public void initAgentState()
+        {
+            switch (agentName)
+            {
+                case "myRectangle": {
+                        currentState = new State(rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.X, rectangleInfo.Y);
+                        Cell AgentCell = gridWorld.locate(currentState);
+                        break;
+                    }
+                case "myCircle":
+                    {
+                        currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y);
+                        Cell AgentCell = gridWorld.locate(currentState);
+                        break;
+                    }
+
+            }
+        }
+
+        public void initGraph()
+        {
+            gr = new Graph(gridWorld);
+            int noNodes = gr.addNodes();
+            GeometryFriends.Log.LogInformation(agentName + "->" + noNodes + "nodes were created");
+            int noEdges = gr.createEdges();
+            GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
+        }
         //implements abstract rectangle interface: used to setup the initial information so that the agent has basic knowledge about the level
         public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
         {
@@ -85,25 +148,12 @@ namespace GeometryFriendsAgents
             circlePlatformsInfo = cPI;
             collectiblesInfo = colI;
             this.area = area;
-
-            //create gridWorld
-            gridWorld.add(obstaclesInfo); //static
-            gridWorld.add(circlePlatformsInfo); //static
-            gridWorld.setEmptyCells();
-            gridWorld.setFloor();
-            gridWorld.setAdjMatrix();
-
-
-            //set agent state
-            currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y);
-            Cell AgentCell = gridWorld.locate(currentState);
-
+            //init grid
+            initGrid();
+            //init agent state
+            initAgentState();
             //Generate graph
-            Graph gr = new Graph(gridWorld);
-            int noNodes = gr.addNodes();
-            GeometryFriends.Log.LogInformation(noNodes + "nodes were created");
-            int noEdges = gr.createEdges();
-            GeometryFriends.Log.LogInformation(noEdges + "edges were created");
+            initGraph();
 
             //create goals
             int goalId = 0;
@@ -122,18 +172,43 @@ namespace GeometryFriendsAgents
                 Plan pl = new Plan();
                 pl.setgoal(g);
 
-                Log.LogInformation("created plan for goal -" + g.id + "in: " + g.goal.getX() + ":" + g.goal.getY());
+                Log.LogInformation(this.agentName + " created plan for goal -" + g.id + "in: " + g.goal.getX() + ":" + g.goal.getY());
                 //flood this goal
                 gridWorld.flood(g);
                 gridWorld.setEmptyCells();
                 //copy gridWorld rep for goal
                 pl.setGridWorld(gridWorld);
                 pl.setAgent(currentState);
+                gr.InitValGraph();
                 pl.setGraph(gr);
                 //find path
                 pl.buildPath();
+                int i = 0;
+                if (pl.path == null)
+                {
+                    Log.LogError(agentName +"  ->NULL PATH!!!");
+                }
+
                 plans.Add(pl);
             }
+
+            //evaluate path
+
+            int order = 0;
+            //order or remove plans
+            foreach (Plan pla in plans)
+            {
+                if (pla.path == null)
+                {
+                    pla.active = false;
+                }
+                pla.active = true;
+            }
+            currentPlan = getActivePlan();
+
+            //comunicate
+            //negociate
+            //update plan status
 
             //send a message to the rectangle informing that the circle setup is complete and show how to pass an attachment: a pen object
             messages.Add(new AgentMessage("Setup complete, testing to send an object as an attachment.", new Pen(Color.BlanchedAlmond)));
@@ -145,12 +220,36 @@ namespace GeometryFriendsAgents
         public override void SensorsUpdated(int nC, RectangleRepresentation rI, CircleRepresentation cI, CollectibleRepresentation[] colI)
         {
             nCollectiblesLeft = nC;
-
             rectangleInfo = rI;
             circleInfo = cI;
             collectiblesInfo = colI;
-        }
 
+            UpdateAgentState();
+            currentPlan = getActivePlan(); // check if this needs to be called
+            if (currentPlan != null)
+            {
+                if (currentPlan.active)
+                {
+                    currentPlan.updatePlan(currentState);
+                    nextAction = currentPlan.executePlan();
+                    if (nextAction == null)
+                    {
+                        Log.LogError(agentName + "  -got null action executing plan");
+                    }
+                    else
+                    {
+                        Log.LogError(agentName + "  -next action is: " + nextAction.getMove());
+                    }
+                }
+            }
+            else
+            {
+                Log.LogError(agentName + "  -no active plan");
+            }
+
+            
+        }
+        
         //implements abstract rectangle interface: signals if the agent is actually implemented or not
         public override bool ImplementedAgent()
         {
@@ -163,6 +262,21 @@ namespace GeometryFriendsAgents
             return agentName;
         }
 
+        private void UpdateAgentState()
+        {
+            currentState.updateState(rectangleInfo.X, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY);
+        }
+
+        private Plan getActivePlan()
+        {
+            foreach (Plan p in plans)
+            {
+                if (p.active = true)
+                    return p;
+            }
+            return null;
+
+        }
         //simple algorithm for choosing a random action for the rectangle agent
         private void RandomAction()
         {
@@ -180,6 +294,17 @@ namespace GeometryFriendsAgents
             messages.Add(new AgentMessage("Going to :" + currentAction));
         }
 
+        private void InformedAction()
+        {
+            Cell current = gridWorld.getCell(gridWorld.widthToCells(rectangleInfo.X), gridWorld.heightToCells(rectangleInfo.Y));
+
+            float xReal = rectangleInfo.VelocityX;
+            float yReal = rectangleInfo.VelocityY;
+
+            currentAction = nextAction.getMove();
+            messages.Add(new AgentMessage("Going to :" + currentAction));
+        }
+
         //implements abstract rectangle interface: GeometryFriends agents manager gets the current action intended to be actuated in the enviroment for this agent
         public override Moves GetAction()
         {
@@ -189,20 +314,92 @@ namespace GeometryFriendsAgents
         //implements abstract rectangle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
+            try
+            {
+                currentPlan.updatePlan(currentState);
+            }
+            catch (Exception e)
+            {
+                Log.LogError(agentName + "  -could not update plan");
+            }
             if (lastMoveTime == 60)
                 lastMoveTime = 0;
-
             if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
             {
                 if (!(DateTime.Now.Second == 59))
                 {
-                    RandomAction();
+                    //RandomAction();
+                    Log.LogError(agentName + "  -update square info:" + this.rectangleInfo.X + " :: " + rectangleInfo.Y);
+                    try
+                    {
+                        InformedAction();
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogError(agentName + "  -could not do informed action");
+                        RandomAction();
+                    }
+                    
                     lastMoveTime = lastMoveTime + 1;
                     //DebugSensorsInfo();
                 }
                 else
                     lastMoveTime = 60;
             }
+
+            //prepare all the debug information to be passed to the agents manager
+            List<DebugInformation> newDebugInfo = new List<DebugInformation>();
+            //clear any previously passed debug information (information passed to the manager is cumulative unless cleared in this way)
+            newDebugInfo.Add(DebugInformationFactory.CreateClearDebugInfo());
+
+
+            //create additional debug information to visualize collectibles that have already been caught by the agent
+            foreach (CollectibleRepresentation item in caughtCollectibles)
+            {
+                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(item.X - debugCircleSize / 2, item.Y - debugCircleSize / 2), debugCircleSize, GeometryFriends.XNAStub.Color.GreenYellow));
+            }
+
+            //create grid debug information // TODO : replace by vector
+            ArrayList n = new ArrayList();
+            foreach (Cell c in gridWorld.grid)
+            {
+                if (c.obstacle)
+                {
+                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Green));
+                }
+                else
+                {
+                    if (c.floor)
+                    {
+                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Red));
+                    }
+                    else
+                    {
+                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Azure));
+                    }
+                }
+                if (gridWorld.locate(currentState).id == c.id)
+                {
+                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Purple));
+
+                }
+                // newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), gridWorld.CelltoWidth(c.pos[0]).ToString() , GeometryFriends.XNAStub.Color.White));
+            }
+
+            foreach (Plan pt in plans)
+            {
+                foreach (Node pa in pt.path._path)
+                {
+                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(pa.getState().getX(), pa.getState().getY()), 10, GeometryFriends.XNAStub.Color.Aquamarine));
+
+                }
+            }
+
+
+
+            //set all the debug information to be read by the agents manager
+            debugInfo = newDebugInfo.ToArray();
+
         }
 
         //typically used console debugging used in previous implementations of GeometryFriends
@@ -239,6 +436,12 @@ namespace GeometryFriendsAgents
         public override void EndGame(int collectiblesCaught, int timeElapsed)
         {
             Log.LogInformation("RECTANGLE - Collectibles caught = " + collectiblesCaught + ", Time elapsed - " + timeElapsed);
+        }
+
+        //implements abstract circle interface: gets the debug information that is to be visually represented by the agents manager
+        public override DebugInformation[] GetDebugInformation()
+        {
+            return debugInfo;
         }
 
         //implememts abstract agent interface: send messages to the circle agent

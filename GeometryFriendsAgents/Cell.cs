@@ -1,4 +1,5 @@
-﻿using GeometryFriends.AI.Debug;
+﻿using GeometryFriends;
+using GeometryFriends.AI.Debug;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,10 +17,10 @@ namespace GeometryFriendsAgents
         public float[] realpos = new float[2];
         public int[] vector = new int[2];
         public ArrayList adj_id = new ArrayList();
-        public ArrayList adj_fc = new ArrayList();
+        public ArrayList adj_action = new ArrayList();
         public Boolean roof = false; //means you might have a top colision not implemented
         public Boolean floor = false; // means you can jump                       
-        public Boolean seen = false;
+        public Boolean seen = false; // used in flood alg
         public Boolean goal = false;
         public Boolean obstacle = false; 
         public Boolean edge = false;  // not implemented
@@ -48,7 +49,7 @@ namespace GeometryFriendsAgents
             ArrayList kViz = new ArrayList();
             foreach (Cell c in nodes)
             {
-                if (this.isViz(c,k) && c.obstacle == false)
+                if (this.isViz(c, k) && c.obstacle == false)
                 {
                     kViz.Add(c);
                 }
@@ -79,36 +80,88 @@ namespace GeometryFriendsAgents
         public float getYcoord() {
             return (getY() * 720) / 40;
         }
-        public void setAdj(ArrayList free)
+
+        public void setAdjRectangle(ArrayList free)
         {
             int k = 1;
-            ArrayList all =  this.getKViz(free, k);
-            int val = 100;
+            GeometryFriends.AI.Moves j;
+            ArrayList all = this.getKViz(free, k);
             foreach (Cell c in all)
             {
+                if (c.edge && !floor)
+                {
+                    j = GeometryFriends.AI.Moves.MORPH_DOWN;
+                    this.adj_id.Add(c.id);
+                    this.adj_action.Add(j);
+                }
+
+                if (floor)
+                {
+                        // same level or down
+                        if (c.toTheLeft(this))
+                        {
+                            j = GeometryFriends.AI.Moves.MOVE_RIGHT;
+                            this.adj_id.Add(c.id);
+                            this.adj_action.Add(j);
+                        }
+                        else
+                        {
+                            j = GeometryFriends.AI.Moves.MOVE_LEFT;
+                            this.adj_id.Add(c.id);
+                            this.adj_action.Add(j);
+                        }
+
+                    
+                }
+            }
+        }
+
+        public void setAdjCircle(ArrayList free)
+        {
+            int k = 1;
+            GeometryFriends.AI.Moves j;
+            ArrayList all =  this.getKViz(free, k);
+            foreach (Cell c in all)
+            {                             
                 if (floor)
                 {
                     if (c.upper(this))
                     {
+                        j = GeometryFriends.AI.Moves.JUMP;
+                        //this means jump
                         this.adj_id.Add(c.id);
-                        this.adj_fc.Add(val);
+                        this.adj_action.Add(j);
                     }
                     else {
+                        // same level or down
+                        if (c.toTheLeft(this))
+                        {
+                            j = GeometryFriends.AI.Moves.ROLL_LEFT;
                             this.adj_id.Add(c.id);
-                            this.adj_fc.Add(val);
+                            this.adj_action.Add(j);
+                        }
+                        else
+                        {
+                            j = GeometryFriends.AI.Moves.ROLL_RIGHT;
+                            this.adj_id.Add(c.id);
+                            this.adj_action.Add(j);
+                        }
+
                          }
                 }
                 else
                 {
-                    if (c.upper(this))
+                    if (c.toTheLeft(this))
                     {
+                        j = GeometryFriends.AI.Moves.ROLL_LEFT;
                         this.adj_id.Add(c.id);
-                        this.adj_fc.Add(val*0.8);
+                        this.adj_action.Add(j);
                     }
                     else
                     {
+                        j = GeometryFriends.AI.Moves.ROLL_RIGHT;
                         this.adj_id.Add(c.id);
-                        this.adj_fc.Add(val);
+                        this.adj_action.Add(j);
                     }
                 }
             }
@@ -126,6 +179,13 @@ namespace GeometryFriendsAgents
         }
         public Boolean upper(Cell c) {
             if (c.getY() > this.getVectorY())
+                return true;
+            else
+                return false;
+        }
+        public Boolean toTheLeft(Cell c)
+        {
+            if (this.getX() > c.getX())
                 return true;
             else
                 return false;

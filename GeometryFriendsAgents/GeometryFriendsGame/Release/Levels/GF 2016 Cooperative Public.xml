@@ -74,6 +74,13 @@
     <GreenElevators />
     <OrangeElevators />
     <TimeLimit value="25" />
+    <HighScores>
+      <HighScore name="myCircle&amp;myRectangle" value="25" />
+      <HighScore name="myCircle&amp;myRectangle" value="25" />
+      <HighScore name="myCircle&amp;myRectangle" value="25" />
+      <HighScore name="myCircle&amp;myRectangle" value="25" />
+      <HighScore name="myCircle&amp;myRectangle" value="25" />
+    </HighScores>
   </Level3>
   <Level4>
     <Description />

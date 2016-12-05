@@ -275,8 +275,12 @@ namespace GeometryFriendsAgents
                     fCost[n] = cTemp + heuristic_wav(n);
                 }
             }
+
+
             return null;
         }
+
+
 
 
         /*
