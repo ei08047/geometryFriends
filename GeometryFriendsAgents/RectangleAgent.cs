@@ -136,6 +136,47 @@ namespace GeometryFriendsAgents
             int noEdges = gr.createEdges();
             GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
         }
+
+        public void initGoals()
+        {
+            int goalId = 0;
+            foreach (CollectibleRepresentation c in collectiblesInfo)
+            {
+                Goal t = new Goal(c, goalId);
+                Log.LogInformation("created goal: " + goalId + "  on position: " + c.X + " --" + c.X);
+                goalId++;
+                goals.Add(t);
+            }
+        }
+
+        public void initPlans()
+        {
+            foreach (Goal g in goals)
+            {
+                //reset values
+                gridWorld.clear();
+                Plan pl = new Plan();
+                pl.setgoal(g);
+
+                Log.LogInformation(agentName + "->" + "created plan for goal -" + g.id + "in: " + g.goal.getX() + ":" + g.goal.getY());
+                //flood this goal
+                gridWorld.flood(g);
+                gridWorld.setEmptyCells();
+                //copy gridWorld rep for goal
+                Node AgentNode = gr.getNodeByCellId(gridWorld.locate(currentState).id);
+                pl.setGridWorld(gridWorld);
+                pl.setAgent(currentState);
+                gr.InitValGraph();
+                //gr.sortGraph();
+                //gr.pruneGraph(AgentNode);
+                pl.setGraph(gr);
+                //find path
+                pl.buildPath();
+                //pl.logPath();
+                plans.Add(pl);
+
+            }
+        }
         //implements abstract rectangle interface: used to setup the initial information so that the agent has basic knowledge about the level
         public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
         {
@@ -154,66 +195,36 @@ namespace GeometryFriendsAgents
             initAgentState();
             //Generate graph
             initGraph();
-
             //create goals
-            int goalId = 0;
-            foreach (CollectibleRepresentation c in collectiblesInfo)
-            {
-                Goal t = new Goal(c, goalId);
-                Log.LogInformation("created goal: " + goalId + "  on position: " + c.X + " --" + c.X);
-                goalId++;
-                goals.Add(t);
-            }
+            initGoals();
             //create plans
-            foreach (Goal g in goals)
-            {
-                //reset values
-                gridWorld.clear();
-                Plan pl = new Plan();
-                pl.setgoal(g);
-
-                Log.LogInformation(this.agentName + " created plan for goal -" + g.id + "in: " + g.goal.getX() + ":" + g.goal.getY());
-                //flood this goal
-                gridWorld.flood(g);
-                gridWorld.setEmptyCells();
-                //copy gridWorld rep for goal
-                pl.setGridWorld(gridWorld);
-                pl.setAgent(currentState);
-                gr.InitValGraph();
-                pl.setGraph(gr);
-                //find path
-                pl.buildPath();
-                int i = 0;
-                if (pl.path == null)
-                {
-                    Log.LogError(agentName +"  ->NULL PATH!!!");
-                }
-
-                plans.Add(pl);
-            }
+            initPlans();
 
             //evaluate path
-
-            int order = 0;
             //order or remove plans
             foreach (Plan pla in plans)
             {
                 if (pla.path == null)
                 {
                     pla.active = false;
+                    pla.collaborative = true;
+                    Log.LogInformation(agentName + "-> plan : " + plans.IndexOf(pla) + " || active:" + pla.active + "|| collaborative " + pla.collaborative);
                 }
                 pla.active = true;
             }
             currentPlan = getActivePlan();
-
+            if (currentPlan == null)
+            {
+                Log.LogInformation(agentName + "-> No active plan!!");
+            }
             //comunicate
+            ///for each goal at least one agent should have an active plan for it
             //negociate
-            //update plan status
+            ///if both have only one should keep it
 
             //send a message to the rectangle informing that the circle setup is complete and show how to pass an attachment: a pen object
             messages.Add(new AgentMessage("Setup complete, testing to send an object as an attachment.", new Pen(Color.BlanchedAlmond)));
 
-            //DebugSensorsInfo();
         }
 
         //implements abstract rectangle interface: registers updates from the agent's sensors that it is up to date with the latest environment information
@@ -223,7 +234,6 @@ namespace GeometryFriendsAgents
             rectangleInfo = rI;
             circleInfo = cI;
             collectiblesInfo = colI;
-
             UpdateAgentState();
             currentPlan = getActivePlan(); // check if this needs to be called
             if (currentPlan != null)
@@ -322,6 +332,7 @@ namespace GeometryFriendsAgents
             {
                 Log.LogError(agentName + "  -could not update plan");
             }
+
             if (lastMoveTime == 60)
                 lastMoveTime = 0;
             if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
@@ -333,6 +344,7 @@ namespace GeometryFriendsAgents
                     try
                     {
                         InformedAction();
+                        //RandomAction();
                     }
                     catch (Exception e)
                     {
@@ -341,65 +353,46 @@ namespace GeometryFriendsAgents
                     }
                     
                     lastMoveTime = lastMoveTime + 1;
-                    //DebugSensorsInfo();
+
+
                 }
                 else
                     lastMoveTime = 60;
             }
-
             //prepare all the debug information to be passed to the agents manager
             List<DebugInformation> newDebugInfo = new List<DebugInformation>();
             //clear any previously passed debug information (information passed to the manager is cumulative unless cleared in this way)
             newDebugInfo.Add(DebugInformationFactory.CreateClearDebugInfo());
-
-
-            //create additional debug information to visualize collectibles that have already been caught by the agent
-            foreach (CollectibleRepresentation item in caughtCollectibles)
-            {
-                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(item.X - debugCircleSize / 2, item.Y - debugCircleSize / 2), debugCircleSize, GeometryFriends.XNAStub.Color.GreenYellow));
-            }
-
-            //create grid debug information // TODO : replace by vector
+            //create grid debug information
             ArrayList n = new ArrayList();
             foreach (Cell c in gridWorld.grid)
             {
                 if (c.obstacle)
                 {
-                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Green));
+                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Chocolate));
                 }
                 else
                 {
-                    if (c.floor)
+                    if (c.edge)
                     {
                         newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Red));
                     }
-                    else
-                    {
-                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Azure));
-                    }
                 }
-                if (gridWorld.locate(currentState).id == c.id)
-                {
-                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Purple));
-
-                }
-                // newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), gridWorld.CelltoWidth(c.pos[0]).ToString() , GeometryFriends.XNAStub.Color.White));
             }
 
             foreach (Plan pt in plans)
             {
-                foreach (Node pa in pt.path._path)
+                if (pt.path != null)
                 {
-                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(pa.getState().getX(), pa.getState().getY()), 10, GeometryFriends.XNAStub.Color.Aquamarine));
+                    foreach (Node pa in pt.path._path)
+                    {
+                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(pa.getState().getX(), pa.getState().getY()), 10, GeometryFriends.XNAStub.Color.Aquamarine));
 
+                    }
                 }
             }
-
-
-
             //set all the debug information to be read by the agents manager
             debugInfo = newDebugInfo.ToArray();
-
         }
 
         //typically used console debugging used in previous implementations of GeometryFriends

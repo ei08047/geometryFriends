@@ -16,8 +16,6 @@ namespace GeometryFriendsAgents
         public Path path;
         public Goal goal;
         public State agent;
-        //public int value =100; //TODO
-        //Boolean active = false; //TODO
         public int order = 0;
         public Boolean finished = false;
         public Boolean active = false;
@@ -27,7 +25,7 @@ namespace GeometryFriendsAgents
         {
         }
         /// <summary>
-        /// getters e setters
+        /// setters
         /// </summary>
         public void setgoal(Goal g) {
             goal = g;
@@ -45,6 +43,18 @@ namespace GeometryFriendsAgents
         /// <summary>
         /// graph building, pathfinding
         /// </summary>
+        /// 
+        public void logPath()
+        { int i = 0;
+            while (i < path.path.Count - 2)
+            {
+                Node cur = (Node)path.path[i];
+                Node next = (Node)path.path[i+1];
+                Action action = cur.getEdge(next);
+                Log.LogInformation("cur" + cur.cellId + "||" + "next" + next.cellId + "-->" + action.getMove());
+                i++;
+            }
+        }
         public void updatePlan(State newState) {
             agent = newState;
         }

@@ -238,11 +238,11 @@ namespace GeometryFriendsAgents
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("An error occurred setting floor: '{0}'", e);
+                    Console.WriteLine("An error occurred setting edge: '{0}'", e);
                 }
                 
             }
-        }
+        } //REPAIR
         public void setEmptyCells() {
             foreach (Cell c in grid)
             {

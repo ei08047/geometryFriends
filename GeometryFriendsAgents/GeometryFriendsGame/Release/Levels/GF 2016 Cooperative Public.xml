@@ -22,8 +22,10 @@
     <TimeLimit value="115" />
     <HighScores>
       <HighScore name="RandPredictorCircle&amp;RandRect" value="115" />
+      <HighScore name="myCircle&amp;myRectangle" value="115" />
       <HighScore name="RandPredictorCircle&amp;RandRect" value="115" />
       <HighScore name="RandPredictorCircle&amp;RandRect" value="115" />
+      <HighScore name="myCircle&amp;myRectangle" value="115" />
     </HighScores>
   </Level1>
   <Level2>

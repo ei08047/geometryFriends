@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 namespace GeometryFriendsAgents
-{ // TODO
+{
     public class Action
     {
         State inicial, expected, final;

@@ -14,7 +14,6 @@ namespace GeometryFriendsAgents
 
         public ArrayList _path;
         public int currentNodeIndex = 0;
-        //public BinaryTree<Node> path2 = new BinaryTree<Node>();
         public Path()
         {
             _path = new ArrayList();

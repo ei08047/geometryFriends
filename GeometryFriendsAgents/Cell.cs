@@ -23,7 +23,7 @@ namespace GeometryFriendsAgents
         public Boolean seen = false; // used in flood alg
         public Boolean goal = false;
         public Boolean obstacle = false; 
-        public Boolean edge = false;  // not implemented
+        public Boolean edge = false;  // REPAIR
         /// <summary>
         /// methods
         /// </summary>
@@ -73,6 +73,10 @@ namespace GeometryFriendsAgents
         public int getX() {
             return this.pos[0];
         }
+        public int getY()
+        {
+            return this.pos[1];
+        }
         public float getXcoord()
         {
             return (getX() * 1200) / 40;
@@ -88,34 +92,31 @@ namespace GeometryFriendsAgents
             ArrayList all = this.getKViz(free, k);
             foreach (Cell c in all)
             {
-                if (c.edge && !floor)
-                {
-                    j = GeometryFriends.AI.Moves.MORPH_DOWN;
-                    this.adj_id.Add(c.id);
-                    this.adj_action.Add(j);
-                }
-
                 if (floor)
                 {
-                        // same level or down
-                        if (c.toTheLeft(this))
-                        {
-                            j = GeometryFriends.AI.Moves.MOVE_RIGHT;
-                            this.adj_id.Add(c.id);
-                            this.adj_action.Add(j);
-                        }
-                        else
+                    if (c.edge)
+                    {
+                        j = GeometryFriends.AI.Moves.MORPH_UP;
+                        this.adj_id.Add(c.id);
+                        this.adj_action.Add(j);
+                    }
+                    // same level or down
+                        if (this.toTheLeft(c))
                         {
                             j = GeometryFriends.AI.Moves.MOVE_LEFT;
                             this.adj_id.Add(c.id);
                             this.adj_action.Add(j);
                         }
-
-                    
-                }
+                        else
+                        {
+                            j = GeometryFriends.AI.Moves.MOVE_RIGHT;
+                            this.adj_id.Add(c.id);
+                            this.adj_action.Add(j);
+                        }
+                    }
+                
             }
         }
-
         public void setAdjCircle(ArrayList free)
         {
             int k = 1;
@@ -166,9 +167,7 @@ namespace GeometryFriendsAgents
                 }
             }
         }
-        public int getY() {
-            return this.pos[1];
-        }
+
         public int getVectorX()
         {
             return this.vector[0];
@@ -193,23 +192,6 @@ namespace GeometryFriendsAgents
         public void clean()
         {
             this.value = 0;
-        }
-        public ArrayList getPossibleMoves()
-        {
-            ArrayList possible_moves = new ArrayList();
-            if (floor)
-            {
-                possible_moves.Add(GeometryFriends.AI.Moves.JUMP);
-            }
-            //if (!left_obs)
-            //{
-                possible_moves.Add(GeometryFriends.AI.Moves.ROLL_LEFT);
-            //}
-            //if (!right_obs)
-            //{
-                possible_moves.Add(GeometryFriends.AI.Moves.ROLL_RIGHT);
-            //}
-            return possible_moves;
         }
 
     }
