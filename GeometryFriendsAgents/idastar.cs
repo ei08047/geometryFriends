@@ -101,8 +101,6 @@ namespace GeometryFriendsAgents
                 return true;
             else return false;
         }
-
-
         /// <summary>
         /// real successors
         /// </summary>
@@ -178,8 +176,6 @@ namespace GeometryFriendsAgents
             return succ;
             }
             */
-
-
         public ArrayList sucessors(Node n)
         {
             ArrayList succ = new ArrayList();
@@ -189,7 +185,6 @@ namespace GeometryFriendsAgents
             }
             return succ;
         }
-
         public Node getMin(ArrayList succ)
         {
             int min = 300;
@@ -205,7 +200,6 @@ namespace GeometryFriendsAgents
             }
             return minNode;
         }
-
         public void init()
         {
             foreach (Node n in graph.getNodes())
@@ -221,9 +215,6 @@ namespace GeometryFriendsAgents
                 }
             }
         }
-
-
-
         //search routine
         public Path search()
         {
@@ -279,10 +270,6 @@ namespace GeometryFriendsAgents
 
             return null;
         }
-
-
-
-
         /*
                  function reconstruct_path(cameFrom, current)
     total_path := [current]

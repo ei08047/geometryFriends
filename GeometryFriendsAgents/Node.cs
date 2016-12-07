@@ -9,6 +9,7 @@ namespace GeometryFriendsAgents
     public class Node : IComparable
     {
         public int value;
+        public int[] vector = new int[2];
         private ArrayList _edges;
         private Node _parent;
         private State _state;

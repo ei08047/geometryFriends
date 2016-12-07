@@ -12,16 +12,18 @@ namespace GeometryFriendsAgents
         public float _posX;
         public float _posY;
         private Boolean vel_dependable;
-        private float radius= 20;
 
-        public State(float velX, float velY, float posX, float posY)
+
+        public State(float velX, float velY, float posX, float posY, float H)
         {
             this._velocityX = velX;
             this._velocityY = velY;
             this._posX = posX;
-            this._posY = posY;
+            this._posY = posY + H;
             vel_dependable = true;
         }
+
+
         public State(float posX, float posY)
         {
             this._posX = posX;
@@ -58,10 +60,6 @@ namespace GeometryFriendsAgents
         public void setVy(float v) {
             _velocityY = v;
         }
-        public void setRadius(float r)
-        {
-            radius = r;
-        }
         public Boolean verticalMovement() {
             if (Math.Abs(_velocityY) > 0)
                 return true;
@@ -75,9 +73,6 @@ namespace GeometryFriendsAgents
             else
                 return false;
         }
-
-
-
 
     }
 }

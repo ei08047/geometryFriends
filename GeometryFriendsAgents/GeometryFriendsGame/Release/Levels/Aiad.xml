@@ -18,4 +18,36 @@
     <GreenElevators />
     <OrangeElevators />
   </Level1>
+  <Level2>
+    <Description />
+    <Tips />
+    <BallStartingPosition X="168" Y="680" />
+    <SquareStartingPosition X="1048" Y="664" />
+    <Collectibles>
+      <Collectible X="552" Y="136" />
+    </Collectibles>
+    <GreenObstacles />
+    <BlackObstacles />
+    <YellowObstacles />
+    <GreenElevators />
+    <OrangeElevators />
+  </Level2>
+  <Level3>
+    <Description />
+    <Tips />
+    <BallStartingPosition X="-1000" Y="-1000" />
+    <SquareStartingPosition X="200" Y="664" />
+    <Collectibles>
+      <Collectible X="952" Y="552" />
+    </Collectibles>
+    <GreenObstacles />
+    <BlackObstacles />
+    <YellowObstacles />
+    <GreenElevators />
+    <OrangeElevators />
+    <HighScores>
+      <HighScore name="myRectangle" value="10" />
+      <HighScore name="myRectangle" value="38" />
+    </HighScores>
+  </Level3>
 </Levels>

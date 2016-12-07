@@ -106,7 +106,6 @@ namespace GeometryFriendsAgents
             //greedy = new Greedy(this, g,a, rep);
             astar = new Idastar( a, g, rep, this);
         }
-
         public void prepareSearch_path(ArrayList path, Node curr, Grid rep)
         {
             foreach (Node p in path)
@@ -116,22 +115,24 @@ namespace GeometryFriendsAgents
                     prepareSearch(p, curr, rep);
                 } 
             }
-        }
-
+        }  // hazard
         public void InitValGraph()
         {
             foreach (Node n in nodes)
             {
-                n.value = this.disRep.getCellbyId(n.cellId).value;
+                Cell temp = this.disRep.getCellbyId(n.cellId);
+                n.value =temp.value;
+                n.vector[0] = temp.vector[0];
+                n.vector[1] = temp.vector[1];
+
+
+
             }
         }
-
         public void sortGraph()
         {
             nodes.Sort();
-        }
-
-
+        } // NOT USED
         public void pruneGraph(Node value)
         {
             foreach (Node outVal in nodes)
@@ -150,9 +151,7 @@ namespace GeometryFriendsAgents
                 { }
               
             }
-        }
-        
-            //TODO: need to remove impossible jumps
+        } //not used
         
 
 

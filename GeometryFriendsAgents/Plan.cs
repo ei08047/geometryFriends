@@ -16,10 +16,11 @@ namespace GeometryFriendsAgents
         public Path path;
         public Goal goal;
         public State agent;
-        public int order = 0;
-        public Boolean finished = false;
+        public int order = 0; //TO BE IMPLEMENTED
+        public Boolean finished = false; //TO BE IMPLEMENTED
+        public Boolean pathToGoal = false;
         public Boolean active = false;
-        public Boolean collaborative=false; 
+        public Boolean collaborative=false;
 
         public Plan()
         {
@@ -44,6 +45,15 @@ namespace GeometryFriendsAgents
         /// graph building, pathfinding
         /// </summary>
         /// 
+        public Node locateAgent() {
+            int id = worldRep.getCurrentCell(agent).id;
+            foreach (Node n in p.nodes)
+            {
+                if (n.cellId == id)
+                    return n;
+            }
+            return null;
+        }
         public void logPath()
         { int i = 0;
             while (i < path.path.Count - 2)
@@ -64,7 +74,8 @@ namespace GeometryFriendsAgents
             //agent not in reach
             if (!worldRep.emptyCells.Contains(agentCell))
             {
-                GeometryFriends.Log.LogError(" didnt found path");
+                GeometryFriends.Log.LogError( "agent not in free cells -> NO PATH");
+                collaborative = true;
             }
             else
             {
@@ -72,13 +83,13 @@ namespace GeometryFriendsAgents
                 this.path =  p.astar.search();
                 if (path == null)
                 {
-                    GeometryFriends.Log.LogError(" didnt found path");
+                    GeometryFriends.Log.LogError("NO SOLO PATH -> NO PATH");
                     collaborative = true;
-                    
                 }
-
+                else {
+                    pathToGoal = true;
+                }
             }
-
         }
         public Boolean finishedPlan() {
             return finished;
@@ -91,34 +102,11 @@ namespace GeometryFriendsAgents
             Log.LogError("located agent at:" + current.cellId + " type " + worldRep.getCellbyId(current.cellId).floor);
             current.eval(this.worldRep);
             int currentVal = current.value;
-            int i =path.Locate(current); // very likely to happen
-            path.setIndex(i);
-            if (path.currentNodeIndex < 0)
-            {
-                Log.LogError("finished path");
-            }
-            else {
-                nextNode = path.getNextNode();
-                Log.LogError("got plan next node at:" + nextNode.cellId);
-            }
-            if (i == -1)
-            {
-                Log.LogError("could not locate ");
-                ArrayList _p = path.path;
-                 p.prepareSearch_path(_p,current,worldRep);
-                p.prepareSearch(nextNode, current, this.worldRep);
-                Path anotherPath = p.astar.search();
-                path.addPath(current , nextNode , anotherPath);
-                return current.getEdge(nextNode);
+            // find equal value node in path -> pathNODE
+            Node pathNode = path.Locate(currentVal);
+            Node nextPathNode = path.getNextNode();
+            return pathNode.getEdge(nextPathNode); 
 
-            }
-            else
-            {
-                Log.LogError("located in plan ");
-                Log.LogError("got plan state index:"  + this.path.currentNodeIndex);
-                //try ti find a edge
-                return current.getEdge(nextNode);
-            }
         }
     }
 }

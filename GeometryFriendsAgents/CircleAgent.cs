@@ -116,22 +116,27 @@ namespace GeometryFriendsAgents
         }
         public void initAgentState()
         {
+
+            
             switch (agentName)
             {
                 case "myRectangle":
                     {
-                        currentState = new State(rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.X, rectangleInfo.Y);
+                        currentState = new State(rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.X, rectangleInfo.Y, rectangleInfo.Height);
+                        int x , y;
+
                         Cell AgentCell = gridWorld.locate(currentState);
                         break;
                     }
                 case "myCircle":
                     {
-                        currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y);
+                        currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y ,circleInfo.Radius);
                         Cell AgentCell = gridWorld.locate(currentState);
                         break;
                     }
 
             }
+            
         }
         public void initGraph() {
             gr = new Graph(gridWorld);
@@ -244,20 +249,7 @@ namespace GeometryFriendsAgents
             circleInfo = cI;
             collectiblesInfo = colI;
             UpdateAgentState();
-            currentPlan = getActivePlan(); // check if this needs to be called
-            if (!(currentPlan == null) )
-            {
-                currentPlan.updatePlan(currentState);
-                nextAction = currentPlan.executePlan();
-                if (nextAction == null)
-                {
-                    Log.LogError(agentName + "->" + "got null action executing plan");
-                }
-                else
-                {
-                    Log.LogError(agentName + "->" + "next action is: " + nextAction.getMove());
-                }
-            }
+            //currentPlan = getActivePlan(); // check if this needs to be called
             //DebugSensorsInfo();
         }
 
@@ -327,7 +319,14 @@ namespace GeometryFriendsAgents
         //implements abstract circle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
-            currentPlan.updatePlan(currentState);
+            try
+            {
+                currentPlan.updatePlan(currentState);
+            }
+            catch (Exception e)
+            {
+                Log.LogError(agentName + "  -could not update plan");
+            }
             //Every second one new action is choosen
             if (lastMoveTime == 60)
                 lastMoveTime = 0;
@@ -337,7 +336,14 @@ namespace GeometryFriendsAgents
                 if (!(DateTime.Now.Second == 59))
                 {
                     Log.LogError(agentName + "->" + "update info:" + circleInfo.X + " :: " +  circleInfo.Y);
-                    InformedAction();
+                    try
+                    {
+                        InformedAction();
+                    }
+                    catch (Exception e) {
+                        Log.LogInformation(" informed not possible");
+                    }
+                    
 
                     lastMoveTime = lastMoveTime + 1;
                     //DebugSensorsInfo();                    
@@ -399,7 +405,7 @@ namespace GeometryFriendsAgents
                     //prepare all the debug information to be passed to the agents manager
                     List<DebugInformation> newDebugInfo = new List<DebugInformation>();
                     //clear any previously passed debug information (information passed to the manager is cumulative unless cleared in this way)
-                    //newDebugInfo.Add(DebugInformationFactory.CreateClearDebugInfo());
+                    newDebugInfo.Add(DebugInformationFactory.CreateClearDebugInfo());
                     //add all the simulator generated debug information about circle/rectangle predicted paths
                     newDebugInfo.AddRange(toSim.SimulationHistoryDebugInformation);
                     //create additional debug information to visualize collectibles that have been predicted to be caught by the simulator
@@ -414,8 +420,9 @@ namespace GeometryFriendsAgents
                         newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(item.X - debugCircleSize / 2, item.Y - debugCircleSize / 2), debugCircleSize, GeometryFriends.XNAStub.Color.GreenYellow));
                     }
 
+                    // creadte adicional goals
 
-                    /*
+                    
                     //CANCER
                     //create grid debug information 
                     ArrayList n = new ArrayList();
@@ -423,38 +430,52 @@ namespace GeometryFriendsAgents
                     {
                         if (c.obstacle)
                         {
-                            newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Green));
+                            newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.PaleTurquoise));
                         }
                         else
                         {
                             if (c.floor)
                             {
-                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Black));
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Gray));
                             }
 
                             if (c.edge)
                             {
-                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.DarkViolet));
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Gray));
                             }
+                            
                             
                         }
 
+
                         if (gridWorld.locate(currentState).id == c.id)
                         {
-                            newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Purple));
-
+                            if (agentName == "myCircle")
+                            {
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Orange));
+                            }
+                            else {
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Green));
+                            }
                         }
                     }
 
-                    foreach (Plan pt in plans)
+                    try
                     {
-                        foreach (Node pa in pt.path._path)
+                        foreach (Plan pt in plans)
                         {
-                            newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(pa.getState().getX(), pa.getState().getY()), 10, GeometryFriends.XNAStub.Color.Aquamarine));
+                            foreach (Node pa in pt.path._path)
+                            {
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(pa.getState().getX(), pa.getState().getY()), 10, GeometryFriends.XNAStub.Color.White));
 
+                            }
                         }
                     }
-                    */
+                    catch (Exception e)
+                    {
+                        Console.Write(e);
+                    }
+                    
 
 
 

@@ -23,7 +23,8 @@ namespace GeometryFriendsAgents
         public Boolean seen = false; // used in flood alg
         public Boolean goal = false;
         public Boolean obstacle = false; 
-        public Boolean edge = false;  // REPAIR
+        public Boolean edge = false;
+
         /// <summary>
         /// methods
         /// </summary>
@@ -94,73 +95,43 @@ namespace GeometryFriendsAgents
             {
                 if (floor)
                 {
-                    if (c.edge)
+                    // same level or down
+                    if (this.toTheLeft(c))
                     {
-                        j = GeometryFriends.AI.Moves.MORPH_UP;
+                        j = GeometryFriends.AI.Moves.MOVE_LEFT;
                         this.adj_id.Add(c.id);
                         this.adj_action.Add(j);
                     }
-                    // same level or down
-                        if (this.toTheLeft(c))
-                        {
-                            j = GeometryFriends.AI.Moves.MOVE_LEFT;
-                            this.adj_id.Add(c.id);
-                            this.adj_action.Add(j);
-                        }
-                        else
-                        {
-                            j = GeometryFriends.AI.Moves.MOVE_RIGHT;
-                            this.adj_id.Add(c.id);
-                            this.adj_action.Add(j);
-                        }
+
+                    if (this.toTheRight(c))
+                    {
+                        j = GeometryFriends.AI.Moves.MOVE_RIGHT;
+                        this.adj_id.Add(c.id);
+                        this.adj_action.Add(j);
                     }
-                
+                } 
             }
         }
+
         public void setAdjCircle(ArrayList free)
         {
-            int k = 1;
+            int k = 10;
             GeometryFriends.AI.Moves j;
             ArrayList all =  this.getKViz(free, k);
             foreach (Cell c in all)
-            {                             
+            {
                 if (floor)
                 {
-                    if (c.upper(this))
-                    {
-                        j = GeometryFriends.AI.Moves.JUMP;
-                        //this means jump
-                        this.adj_id.Add(c.id);
-                        this.adj_action.Add(j);
-                    }
-                    else {
-                        // same level or down
-                        if (c.toTheLeft(this))
-                        {
-                            j = GeometryFriends.AI.Moves.ROLL_LEFT;
-                            this.adj_id.Add(c.id);
-                            this.adj_action.Add(j);
-                        }
-                        else
-                        {
-                            j = GeometryFriends.AI.Moves.ROLL_RIGHT;
-                            this.adj_id.Add(c.id);
-                            this.adj_action.Add(j);
-                        }
-
-                         }
-                }
-                else
-                {
+                    // same level or down
                     if (c.toTheLeft(this))
                     {
-                        j = GeometryFriends.AI.Moves.ROLL_LEFT;
+                        j = GeometryFriends.AI.Moves.GROW;
                         this.adj_id.Add(c.id);
                         this.adj_action.Add(j);
                     }
                     else
                     {
-                        j = GeometryFriends.AI.Moves.ROLL_RIGHT;
+                        j = GeometryFriends.AI.Moves.GROW;
                         this.adj_id.Add(c.id);
                         this.adj_action.Add(j);
                     }
@@ -182,9 +153,20 @@ namespace GeometryFriendsAgents
             else
                 return false;
         }
+        public Boolean bellow(Cell c)
+        {
+            return (!upper(c));
+        }
         public Boolean toTheLeft(Cell c)
         {
             if (this.getX() > c.getX())
+                return true;
+            else
+                return false;
+        }
+        public Boolean toTheRight(Cell c)
+        {
+            if (this.getX() < c.getX())
                 return true;
             else
                 return false;

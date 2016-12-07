@@ -32,33 +32,20 @@ namespace GeometryFriendsAgents
         public void setIndex(int v) {
             currentNodeIndex = v;
         }
-        public void addPath(Node curr, Node next ,Path path)
-        {
-            ArrayList newPath = new ArrayList();
-            newPath.Add(curr);
-            foreach (Node n in path.path)
-            {
-                newPath.Add(n);
-            }
-            int i = Locate(next);
-            i++;
-            while (i < this.path.Count)
-            {
-                newPath.Add(this.path[i]);
-            }
-            this.path = newPath;
-        }
         public void sortPath() {
             path.Sort();
         }
-        public int Locate(Node n)
+        public Node Locate(int v) 
         {
             foreach (Node i in _path)
             {
-                if (n.cellId == i.cellId)
-                    return _path.IndexOf(i);
+                if (i.value == v)
+                {
+                    currentNodeIndex = _path.IndexOf(i);
+                    return (Node)_path[currentNodeIndex];
+                }
             }
-             return -1;
+             return null;
         }
         public Node getNextNode()
         {

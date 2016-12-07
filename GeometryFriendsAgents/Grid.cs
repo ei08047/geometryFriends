@@ -10,23 +10,36 @@ namespace GeometryFriendsAgents
 {
     public class Grid
     {
-        public int length = 40;
-        public Cell[,] grid = new Cell[40, 40];
+        public int length = 42;
+        public Cell[,] grid = new Cell[42, 42];
         public ArrayList obstacles = new ArrayList();
         public ArrayList emptyCells = new ArrayList();
         string agentName;
         public Grid() {
             int id = 0;
-            for (int i = 0; i < 40; i++)
+            for (int i = 0; i < length; i++)
             {  
-                for (int j = 0; j < 40 ; j++)
+                for (int j = 0; j < length; j++)
                 {
-                    grid[i, j] = new Cell();
-                    grid[i, j].set_pos(j,i);
-                    grid[i, j].set_id(id);
-                    id++;
+                    if ( j > 40 || i > 40 || j < 1 || i < 1   )
+                    {
+                        Cell c = new Cell();
+                        c.obstacle = true;
+                        grid[i, j] = c;
+                        grid[i, j].set_pos(j, i);
+                        grid[i, j].set_id(id);
+                        id++;
+                    }
+                    else {
+                        Cell c = new Cell();
+                        grid[i, j] = c;
+                        grid[i, j].set_pos(j, i);
+                        grid[i, j].set_id(id);
+                        id++;
+                    }
                 } 
             }
+
         }
         //getters
         public Cell getCell(int i, int j) {
@@ -214,8 +227,7 @@ namespace GeometryFriendsAgents
                 {
                     if (getDown(c).obstacle)
                         c.floor = true;
-                    if(c.getY() > 20)
-                        c.floor = true;
+
                 }
                 catch (Exception e)
                 {

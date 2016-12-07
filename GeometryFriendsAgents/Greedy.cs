@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 
 namespace GeometryFriendsAgents
-{
+{  // NOT USED
     public class Greedy
     {
         Graph graph;
