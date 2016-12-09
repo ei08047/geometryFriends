@@ -96,6 +96,7 @@
     <HighScores>
       <HighScore name="myCircle" value="55" />
       <HighScore name="RandPredictorCircle" value="55" />
+      <HighScore name="myCircle" value="55" />
       <HighScore name="RandPredictorCircle" value="65" />
     </HighScores>
   </Level3>

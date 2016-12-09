@@ -16,8 +16,18 @@ namespace GeometryFriendsAgents
         public int[] pos = new int[2];
         public float[] realpos = new float[2];
         public int[] vector = new int[2];
+        public GeometryFriends.AI.Moves movement;
+
+        public int verticalValue = 0;
+        /// <summary>
+        /// 
+        /// </summary>
         public ArrayList adj_id = new ArrayList();
         public ArrayList adj_action = new ArrayList();
+
+        /// <summary>
+        /// 
+        /// </summary>
         public Boolean roof = false; //means you might have a top colision not implemented
         public Boolean floor = false; // means you can jump                       
         public Boolean seen = false; // used in flood alg
@@ -48,13 +58,14 @@ namespace GeometryFriendsAgents
         }
         public ArrayList getKViz(ArrayList nodes,int k) {
             ArrayList kViz = new ArrayList();
-            foreach (Cell c in nodes)
-            {
-                if (this.isViz(c, k) && c.obstacle == false)
+                foreach (Cell c in nodes)
                 {
-                    kViz.Add(c);
+                    if (this.isViz(c, k) && c.obstacle == false)
+                    {
+                        kViz.Add(c);
+                    }
                 }
-            }
+            
             return kViz;
         }
         public Boolean isViz(Cell t, int k)
@@ -90,53 +101,102 @@ namespace GeometryFriendsAgents
         {
             int k = 1;
             GeometryFriends.AI.Moves j;
-            ArrayList all = this.getKViz(free, k);
-            foreach (Cell c in all)
+            ArrayList all = this.getKViz(free, 2);
+            int x = this.getVectorX();
+            int y = this.getVectorY();
+            int x_med = 0;
+            foreach (Cell a in all)
             {
-                if (floor)
+                x_med += a.getVectorX();
+                if (a.upper(this)) // roof
                 {
-                    // same level or down
-                    if (this.toTheLeft(c))
-                    {
-                        j = GeometryFriends.AI.Moves.MOVE_LEFT;
-                        this.adj_id.Add(c.id);
-                        this.adj_action.Add(j);
-                    }
+                    verticalValue += a.getVectorY();
+                }
+            }
 
-                    if (this.toTheRight(c))
+
+            if (floor)
+            {
+                if (verticalValue < 0)
+                {
+
+                    j = GeometryFriends.AI.Moves.MORPH_DOWN;
+                    this.adj_id.Add(this.id);
+                    this.adj_action.Add(j);
+                    movement = j;
+                }
+                else
+                {
+                    if (x_med > 0)
                     {
                         j = GeometryFriends.AI.Moves.MOVE_RIGHT;
-                        this.adj_id.Add(c.id);
+                        this.adj_id.Add(this.id);
                         this.adj_action.Add(j);
-                    }
-                } 
-            }
-        }
-
-        public void setAdjCircle(ArrayList free)
-        {
-            int k = 10;
-            GeometryFriends.AI.Moves j;
-            ArrayList all =  this.getKViz(free, k);
-            foreach (Cell c in all)
-            {
-                if (floor)
-                {
-                    // same level or down
-                    if (c.toTheLeft(this))
-                    {
-                        j = GeometryFriends.AI.Moves.GROW;
-                        this.adj_id.Add(c.id);
-                        this.adj_action.Add(j);
+                        movement = j;
                     }
                     else
                     {
-                        j = GeometryFriends.AI.Moves.GROW;
-                        this.adj_id.Add(c.id);
+                        j = GeometryFriends.AI.Moves.MOVE_LEFT;
+                        this.adj_id.Add(this.id);
                         this.adj_action.Add(j);
+                        movement = j;
                     }
                 }
+
             }
+
+        }
+        public void setAdjCircle(ArrayList free)
+        {
+            int k = 1;
+            GeometryFriends.AI.Moves j;
+            ArrayList all = this.getKViz(free, k);
+            int x = this.getVectorX();
+            int y = this.getVectorY();
+            int x_med = 0;
+            int y_med = 0;
+            foreach (Cell a in all)
+            {
+                x_med += a.getVectorX();
+                if(a.upper(this) ) // roof
+                    {
+                    y_med += a.getVectorY();
+                    }
+            }
+
+            if (floor)
+            {
+                    
+                    if (y_med < 0)
+                    {
+
+                            j = GeometryFriends.AI.Moves.JUMP;
+                            this.adj_id.Add(this.id);
+                            this.adj_action.Add(j);
+                            movement = j;
+                        
+                    }
+                
+                else
+                {
+                    if (x_med > 0)
+                    {
+                        j = GeometryFriends.AI.Moves.ROLL_RIGHT;
+                        this.adj_id.Add(this.id);
+                        this.adj_action.Add(j);
+                        movement = j;
+                    }
+                    else
+                    {
+                        j = GeometryFriends.AI.Moves.ROLL_LEFT;
+                        this.adj_id.Add(this.id);
+                        this.adj_action.Add(j);
+                        movement = j;
+                    }
+                }
+                   
+            }
+            
         }
 
         public int getVectorX()

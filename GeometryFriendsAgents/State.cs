@@ -19,7 +19,7 @@ namespace GeometryFriendsAgents
             this._velocityX = velX;
             this._velocityY = velY;
             this._posX = posX;
-            this._posY = posY + H;
+            this._posY = posY + H ;
             vel_dependable = true;
         }
 
@@ -34,10 +34,12 @@ namespace GeometryFriendsAgents
         {
             return this;
         }
-        public void updateState(float X, float Y, float VelocityX, float VelocityY)
+        public void updateState(float X, float Y, float VelocityX, float VelocityY, float h)
         {
             this._posX = X;
-            this._posY = Y;
+             this._posY = Y + h;
+
+            this._posY = Y + h;
             this._velocityX = VelocityX;
             this._velocityY = VelocityY;
         }

@@ -179,6 +179,8 @@ namespace GeometryFriendsAgents
                         viz.Add(next);
                 }
             }
+            setEmptyCells();
+            Log.LogInformation("calculating vectors" + emptyCells.Count);
             calculateVectors(emptyCells);
             Log.LogInformation("calculated flood values");
         }
@@ -206,39 +208,77 @@ namespace GeometryFriendsAgents
                 right = getRight(c).value;
                 up = getUp(c).value;
                 down = getDown(c).value;
-                c.vector[0] = left - right;
-                c.vector[1] = up - down;
+                if ((left == 0 && right > 3))
+                {
+                    c.vector[0] = 1;
+                }
+                else {
+                    if ((right == 0 && left > 3))
+                    {
+                        c.vector[0] = -1;
+                    }
+                    else {
+                        c.vector[0] = left - right;
+                    }
+                }
+                ///
+                if ((up == 0 && down > 3))
+                {
+                    c.vector[1] = 1;
+                }
+                else
+                {
+                    if ((down == 0 && up > 3))
+                    {
+                        c.vector[1] = 0;
+                    }
+                    else
+                    {
+                        c.vector[1] = up - down;
+                    }
+                }
+
             }
             catch (Exception e)
             {
-
+                Console.WriteLine("calc vector", e);
             }
         }
         public Cell locate(State p) { 
             int i, j;
             i = widthToCells(p.getX());
-            j = heightToCells(p.getY());
+            j = heightToCells(p.getY()) ;
             return getCell(i, j);
         }
-        public void setFloor() {
+
+        public int setFloor() {
+            int count = 0;
             foreach (Cell c in grid)
             {
                 try
                 {
-                    if (getDown(c).obstacle)
+                    if (c.getY() > 20)
+                    {
                         c.floor = true;
-
+                        count++;
+                    }
+                    if (getDown(c).obstacle)
+                    {
+                        c.floor = true;
+                        count++;
+                    }
                 }
                 catch (Exception e)
                 {
                     {
                         Console.WriteLine("An error occurred setting floor: '{0}'", e);
                     }
-
                 }
             }
+            return count;
         }
-        public void setEdges() {
+        public int setEdges() {
+            int count = 0;
             foreach (Cell c in grid)
             {
                 try
@@ -246,27 +286,31 @@ namespace GeometryFriendsAgents
                     if (getLeft(c).obstacle || getRight(c).obstacle)
                     {
                         c.edge = true;
+                        count++;
                     }
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("An error occurred setting edge: '{0}'", e);
                 }
-                
             }
-        } //REPAIR
-        public void setEmptyCells() {
+            return count;
+        } 
+        public int setEmptyCells() {
+            int count = 0;
             foreach (Cell c in grid)
             {
                 if (!c.obstacle)
+                {
                     emptyCells.Add(c);
+                    count++;
+                }    
             }
+            return count;
         }
         public void setAdjMatrix() {
-          
             foreach (Cell c in emptyCells)
-             
-                
+            {
                 if (agentName == "myCircle")
                 {
                     c.setAdjCircle(this.emptyCells);
@@ -276,6 +320,7 @@ namespace GeometryFriendsAgents
                     c.setAdjRectangle(this.emptyCells);
                 }
             }
+       }
         public void add_grid_obstacle(int xi, int xf, int yi, int yf)
         {
             int xDiff = xf - xi;

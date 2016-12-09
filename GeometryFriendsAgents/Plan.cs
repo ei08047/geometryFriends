@@ -16,6 +16,7 @@ namespace GeometryFriendsAgents
         public Path path;
         public Goal goal;
         public State agent;
+        public Cell agentCell;
         public int order = 0; //TO BE IMPLEMENTED
         public Boolean finished = false; //TO BE IMPLEMENTED
         public Boolean pathToGoal = false;
@@ -65,9 +66,7 @@ namespace GeometryFriendsAgents
                 i++;
             }
         }
-        public void updatePlan(State newState) {
-            agent = newState;
-        }
+
         public void buildPath() {
             Cell goalCell = worldRep.locate(goal.getState());
             Cell agentCell = worldRep.locate(agent.getState());
@@ -103,9 +102,13 @@ namespace GeometryFriendsAgents
             current.eval(this.worldRep);
             int currentVal = current.value;
             // find equal value node in path -> pathNODE
-            Node pathNode = path.Locate(currentVal);
-            Node nextPathNode = path.getNextNode();
-            return pathNode.getEdge(nextPathNode); 
+            //Node pathNode = path.Locate(currentVal );
+
+            //Node nextPathNode = path.getNextNode();
+            Log.LogInformation("vertical value =" + worldRep.getCellbyId(current.cellId).verticalValue);
+            return new Action(current.getState(), worldRep.getCellbyId(current.cellId).movement);
+
+   //         return pathNode.getEdge(nextPathNode); 
 
         }
     }

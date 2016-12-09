@@ -17,6 +17,10 @@
     </YellowObstacles>
     <GreenElevators />
     <OrangeElevators />
+    <HighScores>
+      <HighScore name="myCircle&amp;myRectangle" value="8" />
+      <HighScore name="myCircle&amp;myRectangle" value="10" />
+    </HighScores>
   </Level1>
   <Level2>
     <Description />
@@ -46,8 +50,70 @@
     <GreenElevators />
     <OrangeElevators />
     <HighScores>
+      <HighScore name="myRectangle" value="4" />
+      <HighScore name="myRectangle" value="6" />
       <HighScore name="myRectangle" value="10" />
       <HighScore name="myRectangle" value="38" />
     </HighScores>
   </Level3>
+  <Level4>
+    <Description />
+    <Tips />
+    <BallStartingPosition X="216" Y="664" />
+    <SquareStartingPosition X="-1000" Y="-1000" />
+    <Collectibles>
+      <Collectible X="952" Y="536" />
+    </Collectibles>
+    <GreenObstacles />
+    <BlackObstacles />
+    <YellowObstacles />
+    <GreenElevators />
+    <OrangeElevators />
+    <HighScores>
+      <HighScore name="myCircle" value="4" />
+      <HighScore name="myCircle" value="5" />
+      <HighScore name="myCircle" value="6" />
+      <HighScore name="myCircle" value="7" />
+      <HighScore name="myCircle" value="7" />
+    </HighScores>
+  </Level4>
+  <Level5>
+    <Description />
+    <Tips />
+    <BallStartingPosition X="264" Y="664" />
+    <SquareStartingPosition X="-1000" Y="-1000" />
+    <Collectibles>
+      <Collectible X="712" Y="216" />
+    </Collectibles>
+    <GreenObstacles />
+    <BlackObstacles>
+      <Obstacle width="192" height="64" X="552" Y="472" centered="false" />
+    </BlackObstacles>
+    <YellowObstacles />
+    <GreenElevators />
+    <OrangeElevators />
+    <HighScores>
+      <HighScore name="myCircle" value="8" />
+      <HighScore name="myCircle" value="19" />
+      <HighScore name="myCircle" value="20" />
+      <HighScore name="myCircle" value="54" />
+    </HighScores>
+  </Level5>
+  <Level6>
+    <Description />
+    <Tips />
+    <BallStartingPosition X="1144" Y="664" />
+    <SquareStartingPosition X="-1000" Y="-1000" />
+    <Collectibles>
+      <Collectible X="1128" Y="440" />
+      <Collectible X="104" Y="312" />
+    </Collectibles>
+    <GreenObstacles />
+    <BlackObstacles>
+      <Obstacle width="160" height="64" X="24" Y="520" centered="false" />
+    </BlackObstacles>
+    <YellowObstacles />
+    <GreenElevators />
+    <OrangeElevators />
+  </Level6>
 </Levels>

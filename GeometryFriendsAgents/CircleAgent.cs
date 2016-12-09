@@ -105,26 +105,21 @@ namespace GeometryFriendsAgents
             }
             else
             {
-
                 gridWorld.add(obstaclesInfo); //static
                 gridWorld.add(rectanglePlatformsInfo); //static
             }
-            gridWorld.setEmptyCells();
-            gridWorld.setFloor();
-            gridWorld.setEdges();
-            gridWorld.setAdjMatrix();
+            int g_empty = gridWorld.setEmptyCells();
+            int g_floor = gridWorld.setFloor();
+            int g_edges = gridWorld.setEdges();
+            Log.LogInformation("Grid initiated with " + g_empty + "  empty cells || " + g_floor + " floor cells ||  " + g_edges + "  cell edges");
         }
         public void initAgentState()
         {
-
-            
             switch (agentName)
             {
                 case "myRectangle":
                     {
-                        currentState = new State(rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.X, rectangleInfo.Y, rectangleInfo.Height);
-                        int x , y;
-
+                        currentState = new State(rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.X, rectangleInfo.Y, rectangleInfo.Height / 2);
                         Cell AgentCell = gridWorld.locate(currentState);
                         break;
                     }
@@ -134,16 +129,12 @@ namespace GeometryFriendsAgents
                         Cell AgentCell = gridWorld.locate(currentState);
                         break;
                     }
-
             }
-            
         }
         public void initGraph() {
             gr = new Graph(gridWorld);
             int noNodes = gr.addNodes();
             GeometryFriends.Log.LogInformation(agentName + "->" + noNodes + "nodes were created");
-            int noEdges = gr.createEdges();
-            GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
         }
         public void initGoals()
         {
@@ -169,10 +160,14 @@ namespace GeometryFriendsAgents
                 //flood this goal
                 gridWorld.flood(g);
                 gridWorld.setEmptyCells();
+                gridWorld.setAdjMatrix();
                 //copy gridWorld rep for goal
                 Node AgentNode = gr.getNodeByCellId(gridWorld.locate(currentState).id);
                 pl.setGridWorld(gridWorld);
                 pl.setAgent(currentState);
+
+                int noEdges = gr.createEdges();
+                GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
                 gr.InitValGraph();
                 //gr.sortGraph();
                 //gr.pruneGraph(AgentNode);
@@ -275,19 +270,31 @@ namespace GeometryFriendsAgents
 
         private void UpdateAgentState()
         {
-            currentState.updateState(circleInfo.X, circleInfo.Y, circleInfo.VelocityX, circleInfo.VelocityY);
+            currentState.updateState(circleInfo.X, circleInfo.Y, circleInfo.VelocityX, circleInfo.VelocityY , circleInfo.Radius );
+            currentPlan.setAgent(currentState);
         }
 
         private Plan getActivePlan()
         {
             foreach (Plan p in plans)
             {
-                if (p.active = true)
-                    return p;
+                if (p.goal.isCaugcht())
+                {
+                    plans.Remove(p);
+                }
+                else
+                {
+                    if (p.active == true)
+                    {
+                        gridWorld = p.worldRep;
+                        return p;
+                    }
+                }
             }
             return null;
             
         }
+
 
         //simple algorithm for choosing a random action for the circle agent
         private void RandomAction()
@@ -319,14 +326,8 @@ namespace GeometryFriendsAgents
         //implements abstract circle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
-            try
-            {
-                currentPlan.updatePlan(currentState);
-            }
-            catch (Exception e)
-            {
-                Log.LogError(agentName + "  -could not update plan");
-            }
+
+
             //Every second one new action is choosen
             if (lastMoveTime == 60)
                 lastMoveTime = 0;
@@ -336,8 +337,18 @@ namespace GeometryFriendsAgents
                 if (!(DateTime.Now.Second == 59))
                 {
                     Log.LogError(agentName + "->" + "update info:" + circleInfo.X + " :: " +  circleInfo.Y);
+                    //check plan state
                     try
                     {
+                        try
+                        {
+                            nextAction = currentPlan.executePlan();
+                            Log.LogInformation("next action" + nextAction.getMove());
+                        }
+                        catch (Exception e)
+                        {
+                            Log.LogError(agentName + "  -could not execute plan 2.0");
+                        }
                         InformedAction();
                     }
                     catch (Exception e) {
@@ -368,6 +379,10 @@ namespace GeometryFriendsAgents
                     }
                     foreach (CollectibleRepresentation item in toRemove)
                     {
+                        foreach (Plan p in plans)
+                        {
+                            p.goal.setCatched(item);
+                        }
                         uncaughtCollectibles.Remove(item);
                     }
                 }
@@ -428,34 +443,36 @@ namespace GeometryFriendsAgents
                     ArrayList n = new ArrayList();
                     foreach (Cell c in gridWorld.grid)
                     {
+                        newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]) , gridWorld.CelltoHeight(c.pos[1]) ), c.vector[0].ToString(), GeometryFriends.XNAStub.Color.Black));
+                        /*
                         if (c.obstacle)
                         {
-                            newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.PaleTurquoise));
+                            newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 8, GeometryFriends.XNAStub.Color.PaleTurquoise));
                         }
                         else
                         {
                             if (c.floor)
                             {
-                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Gray));
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 8, GeometryFriends.XNAStub.Color.Gray));
                             }
 
                             if (c.edge)
                             {
-                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Gray));
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 8, GeometryFriends.XNAStub.Color.Gray));
                             }
-                            
-                            
+                              
                         }
+                        */
 
 
                         if (gridWorld.locate(currentState).id == c.id)
                         {
                             if (agentName == "myCircle")
                             {
-                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Orange));
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 5, GeometryFriends.XNAStub.Color.Orange));
                             }
                             else {
-                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Green));
+                                newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 5, GeometryFriends.XNAStub.Color.Green));
                             }
                         }
                     }

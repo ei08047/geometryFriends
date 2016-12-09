@@ -108,7 +108,6 @@ namespace GeometryFriendsAgents
             gridWorld.setEmptyCells();
             gridWorld.setFloor();
             gridWorld.setEdges();
-            gridWorld.setAdjMatrix();
         }
         public void initAgentState()
         {
@@ -136,8 +135,6 @@ namespace GeometryFriendsAgents
             gr = new Graph(gridWorld);
             int noNodes = gr.addNodes();
             GeometryFriends.Log.LogInformation(agentName + "->" + noNodes + "nodes were created");
-            int noEdges = gr.createEdges();
-            GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
         }
         public void initGoals()
         {
@@ -163,10 +160,13 @@ namespace GeometryFriendsAgents
                 //flood this goal
                 gridWorld.flood(g);
                 gridWorld.setEmptyCells();
+                gridWorld.setAdjMatrix();
                 //copy gridWorld rep for goal
                 Node AgentNode = gr.getNodeByCellId(gridWorld.locate(currentState).id);
                 pl.setGridWorld(gridWorld);
                 pl.setAgent(currentState);
+                int noEdges = gr.createEdges();
+                GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
                 gr.InitValGraph();
                 //gr.sortGraph();
                 //gr.pruneGraph(AgentNode);
@@ -178,6 +178,7 @@ namespace GeometryFriendsAgents
 
             }
         }
+
         //implements abstract rectangle interface: used to setup the initial information so that the agent has basic knowledge about the level
         public override void Setup(CountInformation nI, RectangleRepresentation rI, CircleRepresentation cI, ObstacleRepresentation[] oI, ObstacleRepresentation[] rPI, ObstacleRepresentation[] cPI, CollectibleRepresentation[] colI, Rectangle area, double timeLimit)
         {
@@ -211,7 +212,9 @@ namespace GeometryFriendsAgents
                     pla.collaborative = true;
                     Log.LogInformation(agentName + "-> plan : " + plans.IndexOf(pla) + " || active:" + pla.active + "|| collaborative " + pla.collaborative);
                 }
-                pla.active = true;
+                else {
+                    pla.active = true;
+                }
             }
             currentPlan = getActivePlan();
             if (currentPlan == null)
@@ -275,7 +278,8 @@ namespace GeometryFriendsAgents
 
         private void UpdateAgentState()
         {
-            currentState.updateState(rectangleInfo.X, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY);
+            currentState.updateState(rectangleInfo.X, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height / 2);
+            currentPlan.setAgent(currentState);
         }
 
         private Plan getActivePlan()
@@ -307,10 +311,6 @@ namespace GeometryFriendsAgents
 
         private void InformedAction()
         {
-            Cell current = gridWorld.getCell(gridWorld.widthToCells(rectangleInfo.X), gridWorld.heightToCells(rectangleInfo.Y));
-
-            float xReal = rectangleInfo.VelocityX;
-            float yReal = rectangleInfo.VelocityY;
 
             currentAction = nextAction.getMove();
             messages.Add(new AgentMessage("Going to :" + currentAction));
@@ -325,38 +325,42 @@ namespace GeometryFriendsAgents
         //implements abstract rectangle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
-            
-            try
+
+
+            //Every second one new action is choosen
+            if (lastMoveTime == 60)
             {
-                currentPlan.updatePlan(currentState);
-            }
-            catch (Exception e)
-            {
-                Log.LogError(agentName + "  -could not update plan");
+                lastMoveTime = 0;
+                InformedAction();
             }
 
-            if (lastMoveTime == 60)
-                lastMoveTime = 0;
             if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
             {
                 if (!(DateTime.Now.Second == 59))
                 {
-                    //RandomAction();
-                    Log.LogError(agentName + "  -update square info:" + this.rectangleInfo.X + " :: " + rectangleInfo.Y);
+                    Log.LogError(agentName + "->" + "update info:" + circleInfo.X + " :: " + circleInfo.Y);
                     try
                     {
-                        InformedAction();
-                        //RandomAction();
+                        try
+                        {
+                            nextAction = currentPlan.executePlan();
+                            Log.LogInformation("next action" + nextAction.getMove());
+                            InformedAction();
+                        }
+                        catch (Exception e)
+                        {
+                            Log.LogError(agentName + "  -could not execute plan 2.0");
+                        }
+                        
                     }
                     catch (Exception e)
                     {
-                        Log.LogError(agentName + "  -could not do informed action");
-                        RandomAction();
+                        Log.LogInformation(" informed not possible");
                     }
-                    
+
+
                     lastMoveTime = lastMoveTime + 1;
-
-
+                    //DebugSensorsInfo();                    
                 }
                 else
                     lastMoveTime = 60;
@@ -415,35 +419,39 @@ namespace GeometryFriendsAgents
             ArrayList n = new ArrayList();
             foreach (Cell c in gridWorld.grid)
             {
+                /*
                 if (c.obstacle)
                 {
-                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.PaleTurquoise));
+                    newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 8, GeometryFriends.XNAStub.Color.PaleTurquoise));
                 }
                 else
                 {
                     if (c.floor)
                     {
-                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Gray));
+                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 8, GeometryFriends.XNAStub.Color.Gray));
                     }
 
                     if (c.edge)
                     {
-                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 10, GeometryFriends.XNAStub.Color.Gray));
+                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 8, GeometryFriends.XNAStub.Color.Gray));
                     }
+                    
 
 
                 }
-
+                */
+                newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), c.vector[1].ToString(), GeometryFriends.XNAStub.Color.Black));
+                //newDebugInfo.Add(DebugInformationFactory.CreateRectangleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), new Size(c.vector[0], c.vector[1]), GeometryFriends.XNAStub.Color.Black));
 
                 if (gridWorld.locate(currentState).id == c.id)
                 {
                     if (agentName == "myCircle")
                     {
-                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Orange));
+                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 5, GeometryFriends.XNAStub.Color.Orange));
                     }
                     else
                     {
-                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 20, GeometryFriends.XNAStub.Color.Green));
+                        newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 5, GeometryFriends.XNAStub.Color.Green));
                     }
                 }
             }

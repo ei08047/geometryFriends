@@ -11,9 +11,12 @@ namespace GeometryFriendsAgents
     {
         public int id;
         public State goal;
+        public Boolean catched=false;
+        public CollectibleRepresentation cr;
         public Goal(CollectibleRepresentation coll, int i)
         {
             goal = new State(coll.X, coll.Y);
+            cr = coll;
             id = i;
         }
         public Goal(State s)
@@ -35,6 +38,17 @@ namespace GeometryFriendsAgents
             p.setgoal(this);
             return p;
         }
+        public void setCatched(CollectibleRepresentation c)
+        {
+            if(c.Equals( cr) )
+            catched = true;
+            
+        }
+        public Boolean isCaugcht()
+        {
+            return catched;
+        }
+
 
     }
 }
