@@ -62,6 +62,26 @@ namespace GeometryFriendsAgents
 
             return expected;
         }
+        public void getHorizontalMovement() {
+            if (inicial.getVx() > 0)
+            {
+                expected._posX = inicial.getX() + inicial.getVx();
+            }
+            else {
+                expected._posX = inicial.getX() - inicial.getVx();
+            }
+        }
+        public void getVerticalMovement()
+        {
+            if (inicial.getVy() > 0)
+            {
+                expected._posY = inicial.getY() + inicial.getVy();
+            }
+            else
+            {
+                expected._posY = inicial.getY() - inicial.getVy();
+            }
+        }
         public Moves getMove()
         {
             return move;

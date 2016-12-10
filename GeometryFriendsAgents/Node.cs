@@ -16,12 +16,6 @@ namespace GeometryFriendsAgents
         public int cellId;
         public Dictionary<int, Action> adj = new Dictionary<int, Action>();
 
-
-
-
-
-
-
     public Node()
         {
             this._edges = new ArrayList();

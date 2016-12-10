@@ -32,7 +32,8 @@ namespace GeometryFriendsAgents
         public Boolean floor = false; // means you can jump                       
         public Boolean seen = false; // used in flood alg
         public Boolean goal = false;
-        public Boolean obstacle = false; 
+        public Boolean obstacle = false;
+        public Boolean rectangle = false;
         public Boolean edge = false;
 
         /// <summary>
@@ -154,29 +155,23 @@ namespace GeometryFriendsAgents
             int x = this.getVectorX();
             int y = this.getVectorY();
             int x_med = 0;
-            int y_med = 0;
             foreach (Cell a in all)
             {
                 x_med += a.getVectorX();
                 if(a.upper(this) ) // roof
                     {
-                    y_med += a.getVectorY();
+                    verticalValue += a.getVectorY();
                     }
             }
-
             if (floor)
             {
-                    
-                    if (y_med < 0)
+                    if (verticalValue < 0)
                     {
-
                             j = GeometryFriends.AI.Moves.JUMP;
                             this.adj_id.Add(this.id);
                             this.adj_action.Add(j);
-                            movement = j;
-                        
+                            movement = j;  
                     }
-                
                 else
                 {
                     if (x_med > 0)
@@ -198,6 +193,7 @@ namespace GeometryFriendsAgents
             }
             
         }
+
 
         public int getVectorX()
         {
@@ -231,6 +227,7 @@ namespace GeometryFriendsAgents
             else
                 return false;
         }
+
         public void clean()
         {
             this.value = 0;

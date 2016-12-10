@@ -1,4 +1,5 @@
 ﻿using GeometryFriends;
+using GeometryFriends.AI.Communication;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -93,20 +94,42 @@ namespace GeometryFriendsAgents
         public Boolean finishedPlan() {
             return finished;
         }
+
+        public AgentMessage talk()
+        {
+            AgentMessage m = new AgentMessage("ze", null);
+
+            return m;
+        }
         public Action executePlan()
         {
             Log.LogError("executing plan");
-            Node current = p.getNodeByCellId(worldRep.locate(agent).id);
-            Node nextNode = null;
+
+            Cell c = worldRep.locate(agent);
+            if (c == null)
+            {
+                Log.LogError("nullllll cell");
+            }
+            Node current = p.getNodeByCellId(c.id);
+            if (current == null)
+            {
+                Log.LogInformation("null locate"+ p.getNodes().Count);
+            }
+            else {
+                Log.LogInformation("dammmmm" + p.getNodes().Count);
+            }
+            //Node nextNode = null;
             Log.LogError("located agent at:" + current.cellId + " type " + worldRep.getCellbyId(current.cellId).floor);
             current.eval(this.worldRep);
-            int currentVal = current.value;
+            //int currentVal = current.value;
             // find equal value node in path -> pathNODE
             //Node pathNode = path.Locate(currentVal );
 
             //Node nextPathNode = path.getNextNode();
-            Log.LogInformation("vertical value =" + worldRep.getCellbyId(current.cellId).verticalValue);
-            return new Action(current.getState(), worldRep.getCellbyId(current.cellId).movement);
+            //Log.LogInformation("vertical value =" + worldRep.getCellbyId(current.cellId).verticalValue);
+            Action f = new Action(current.getState(), worldRep.getCellbyId(current.cellId).movement);
+
+            return f;
 
    //         return pathNode.getEdge(nextPathNode); 
 

@@ -166,14 +166,14 @@ namespace GeometryFriendsAgents
                 pl.setGridWorld(gridWorld);
                 pl.setAgent(currentState);
 
-                int noEdges = gr.createEdges();
-                GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
                 gr.InitValGraph();
+                //int noEdges = gr.createEdges();
+                //GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
                 //gr.sortGraph();
                 //gr.pruneGraph(AgentNode);
                 pl.setGraph(gr);
                 //find path
-                pl.buildPath();
+                //pl.buildPath();
                 plans.Add(pl);
             }
         }
@@ -206,23 +206,9 @@ namespace GeometryFriendsAgents
             //order or remove plans
             foreach (Plan pla in plans)
             {
-                if (pla.path == null)
-                {
-                    pla.active = false;
-                    pla.collaborative = true;
-                    Log.LogInformation(agentName + "-> plan : " + plans.IndexOf(pla) + " || active:" + pla.active + "|| collaborative " + pla.collaborative);
-                }
-                pla.active = true;
+                pla.active = false;
             }
-            currentPlan = getActivePlan();
-            if (currentPlan == null)
-            {
-                Log.LogInformation(agentName + "-> No active plan!!");
-                messages.Add(new AgentMessage("No Active plan ", currentPlan));
-            }
-            else {
-                messages.Add(new AgentMessage("current active plan ", currentPlan));
-            }
+
             //comunicate
                 ///for each goal at least one agent should have an active plan for it
             //negociate
@@ -244,8 +230,16 @@ namespace GeometryFriendsAgents
             circleInfo = cI;
             collectiblesInfo = colI;
             UpdateAgentState();
-            //currentPlan = getActivePlan(); // check if this needs to be called
-            //DebugSensorsInfo();
+            try
+            {
+                currentPlan = getActivePlan(); // check if this needs to be called
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("stress", e);
+            }
+                        //DebugSensorsInfo();
         }
 
         
@@ -330,8 +324,10 @@ namespace GeometryFriendsAgents
 
             //Every second one new action is choosen
             if (lastMoveTime == 60)
-                lastMoveTime = 0;
-
+            { 
+            lastMoveTime = 0;
+            InformedAction();
+             }
             if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
             {
                 if (!(DateTime.Now.Second == 59))
@@ -409,13 +405,13 @@ namespace GeometryFriendsAgents
                     //toSim.DebugInfoSelected = ActionSimulator.DebugInfoMode.Circle;
 
                     //setup the current circle action in the simulator
-                    toSim.AddInstruction(currentAction);
-
+                    toSim.AddInstruction(currentAction);;
                     //register collectibles that are caught during simulation
                     toSim.SimulatorCollectedEvent += delegate (Object o, CollectibleRepresentation col) { simCaughtCollectibles.Add(col); };
 
                     //simulate 2 seconds (predict what will happen 2 seconds ahead)
                     toSim.Update(2);
+                    
 
                     //prepare all the debug information to be passed to the agents manager
                     List<DebugInformation> newDebugInfo = new List<DebugInformation>();
@@ -569,6 +565,14 @@ namespace GeometryFriendsAgents
                         Log.LogInformation("The attachment is a pen, let's see its color: " + ((Pen)item.Attachment).Color.ToString());
                     }
                 }
+                if (item.Message == "ze" )
+                {
+                    Log.LogInformation("RECEIVED  ZE" );
+                    Plan p = (Plan)plans[0];
+                    p.active = true;
+
+                }
+
             }
         }
     }

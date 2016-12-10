@@ -72,8 +72,10 @@ namespace GeometryFriendsAgents
                 {
                     try
                     {
-                        int id = (int)( c.adj_id[i]);
                         Action val = new Action(n.getState(), (GeometryFriends.AI.Moves) c.adj_action[i] );
+                        State dest = val.calculateExpected();
+                        Cell dest_cell = disRep.locate(dest);
+                        int id = dest_cell.id;
                         n.adj.Add(id, val );
                     }
                     catch (Exception e)
@@ -90,16 +92,41 @@ namespace GeometryFriendsAgents
         }
         public int createEdges()
         {
-            int noEdges = 0;
-            foreach (Node n in getNodes())
+
+            ArrayList freeCells = this.disRep.getFreeCells();
+            ArrayList floorCells = new ArrayList();
+            foreach (Cell f in freeCells)
             {
-                foreach (KeyValuePair<int, Action> entry in n.adj)
+                if (f.floor)
                 {
-                    n.addEdge(getNodeByCellId(entry.Key), entry.Value);
-                    noEdges++;
+                    floorCells.Add(f);
                 }
             }
-            return noEdges;
+            
+            int noEdges = 0;
+            int i = 0;
+            int inc = 1;
+            while (floorCells.Count > 1)
+            {
+                Cell currCell = (Cell)floorCells[0];
+                Cell nextCell = (Cell)floorCells[inc];
+                // check if possible edge
+                Node curr = getNodeByCellId(currCell.id);
+                Node next = getNodeByCellId(nextCell.id);
+                //curr.addEdge(next, );
+                //next.addEdge(curr);
+                if (inc >= floorCells.Count)
+                {
+                    floorCells.Remove(currCell);
+                    inc = 1;
+                }
+                else {
+                    inc++;
+                }
+               
+            }
+
+            return -2;
         }
         public void prepareSearch( Node g,Node a,Grid rep) 
         {

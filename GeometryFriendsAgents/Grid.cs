@@ -334,6 +334,39 @@ namespace GeometryFriendsAgents
                 }
             }
         }
+
+        public void add_grid_agent(int xi, int xf, int yi, int yf)
+        {
+
+            int xDiff = xf - xi;
+            int yDiff = yf - yi;
+
+            for (int i = 0; i < xDiff; i++)
+            {
+                for (int j = 0; j < yDiff; j++)
+                {
+                    grid[yi + j, xi + i].obstacle = true;
+                    grid[yi + j, xi + i].rectangle = true;
+                }
+            }
+        }
+        public void updateGrid(State p)
+        {
+            foreach (Cell c in grid)
+            {
+                if (c.rectangle)
+                {
+                    c.rectangle = false;
+                    c.obstacle = false;
+                }
+            }
+            int xi = widthToCells(p.getX() - p.h);
+            int xf = widthToCells(p.getX() + p.h);
+            int yi = heightToCells(p.getY() - p.h);
+            int yf = heightToCells(p.getY() + p.h);
+            add_grid_agent(xi,xf,yi,yf);
+        }
+
         //casters
         public int widthToCells(float width) {
             int temp = (int)( (width * 39) / 1200) ;

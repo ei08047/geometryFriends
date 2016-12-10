@@ -165,14 +165,14 @@ namespace GeometryFriendsAgents
                 Node AgentNode = gr.getNodeByCellId(gridWorld.locate(currentState).id);
                 pl.setGridWorld(gridWorld);
                 pl.setAgent(currentState);
-                int noEdges = gr.createEdges();
-                GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
+               // int noEdges = gr.createEdges();
+                //GeometryFriends.Log.LogInformation(agentName + "->" + noEdges + "edges were created");
                 gr.InitValGraph();
                 //gr.sortGraph();
                 //gr.pruneGraph(AgentNode);
                 pl.setGraph(gr);
                 //find path
-                pl.buildPath();
+                //pl.buildPath();
                 //pl.logPath();
                 plans.Add(pl);
 
@@ -206,15 +206,7 @@ namespace GeometryFriendsAgents
             //order or remove plans
             foreach (Plan pla in plans)
             {
-                if (pla.path == null)
-                {
-                    pla.active = false;
-                    pla.collaborative = true;
-                    Log.LogInformation(agentName + "-> plan : " + plans.IndexOf(pla) + " || active:" + pla.active + "|| collaborative " + pla.collaborative);
-                }
-                else {
                     pla.active = true;
-                }
             }
             currentPlan = getActivePlan();
             if (currentPlan == null)
@@ -238,7 +230,6 @@ namespace GeometryFriendsAgents
             rectangleInfo = rI;
             circleInfo = cI;
             collectiblesInfo = colI;
-            UpdateAgentState();
             /*
             if (currentPlan != null)
             {
@@ -287,7 +278,10 @@ namespace GeometryFriendsAgents
             foreach (Plan p in plans)
             {
                 if (p.active = true)
+                {
+                    gridWorld = p.worldRep;
                     return p;
+                }
             }
             return null;
 
@@ -325,14 +319,13 @@ namespace GeometryFriendsAgents
         //implements abstract rectangle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
-
-
             //Every second one new action is choosen
             if (lastMoveTime == 60)
             {
                 lastMoveTime = 0;
-                InformedAction();
             }
+
+          
 
             if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
             {
@@ -343,8 +336,15 @@ namespace GeometryFriendsAgents
                     {
                         try
                         {
+                            UpdateAgentState();
                             nextAction = currentPlan.executePlan();
-                            Log.LogInformation("next action" + nextAction.getMove());
+                            
+                            if (nextAction.getMove() == GeometryFriends.AI.Moves.MORPH_DOWN)
+                            {
+                                messages.Add(currentPlan.talk());
+                            }
+                            
+                            Log.LogInformation(agentName +" next action" + nextAction.getMove());
                             InformedAction();
                         }
                         catch (Exception e)
@@ -355,7 +355,7 @@ namespace GeometryFriendsAgents
                     }
                     catch (Exception e)
                     {
-                        Log.LogInformation(" informed not possible");
+                        Log.LogInformation(agentName + " informed not possible");
                     }
 
 
