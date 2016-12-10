@@ -118,10 +118,10 @@ namespace GeometryFriendsAgents
 
             if (floor)
             {
-                if (verticalValue < 0)
+                if (verticalValue < 0   )
                 {
 
-                    j = GeometryFriends.AI.Moves.MORPH_DOWN;
+                    j = GeometryFriends.AI.Moves.MORPH_UP;
                     this.adj_id.Add(this.id);
                     this.adj_action.Add(j);
                     movement = j;

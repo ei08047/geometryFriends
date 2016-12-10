@@ -20,6 +20,7 @@
     <TimeLimit value="9" />
     <HighScores>
       <HighScore name="myCircle&amp;myRectangle" value="8" />
+      <HighScore name="myCircle&amp;myRectangle" value="8" />
       <HighScore name="myCircle&amp;myRectangle" value="9" />
       <HighScore name="myCircle&amp;myRectangle" value="10" />
     </HighScores>
@@ -30,7 +31,7 @@
     <BallStartingPosition X="88" Y="664" />
     <SquareStartingPosition X="264" Y="664" />
     <Collectibles>
-      <Collectible X="872" Y="504" />
+      <Collectible X="1208" Y="248" />
     </Collectibles>
     <GreenObstacles />
     <BlackObstacles />
@@ -38,7 +39,8 @@
     <GreenElevators />
     <OrangeElevators />
     <HighScores>
-      <HighScore name="myCircle&amp;myRectangle" value="7" />
+      <HighScore name="myCircle&amp;myRectangle" value="9" />
+      <HighScore name="myCircle&amp;myRectangle" value="55" />
     </HighScores>
   </Level2>
   <Level3>

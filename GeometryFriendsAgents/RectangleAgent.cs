@@ -269,7 +269,7 @@ namespace GeometryFriendsAgents
 
         private void UpdateAgentState()
         {
-            currentState.updateState(rectangleInfo.X, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height / 2);
+            currentState.updateState(rectangleInfo.X , rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height / 2);
             currentPlan.setAgent(currentState);
         }
 
@@ -319,6 +319,7 @@ namespace GeometryFriendsAgents
         //implements abstract rectangle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
+            UpdateAgentState();
             //Every second one new action is choosen
             if (lastMoveTime == 60)
             {
@@ -339,7 +340,7 @@ namespace GeometryFriendsAgents
                             UpdateAgentState();
                             nextAction = currentPlan.executePlan();
                             
-                            if (nextAction.getMove() == GeometryFriends.AI.Moves.MORPH_DOWN)
+                            if (nextAction.getMove() == GeometryFriends.AI.Moves.MORPH_UP)
                             {
                                 messages.Add(currentPlan.talk());
                             }

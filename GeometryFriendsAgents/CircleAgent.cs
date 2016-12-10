@@ -230,15 +230,6 @@ namespace GeometryFriendsAgents
             circleInfo = cI;
             collectiblesInfo = colI;
             UpdateAgentState();
-            try
-            {
-                currentPlan = getActivePlan(); // check if this needs to be called
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("stress", e);
-            }
                         //DebugSensorsInfo();
         }
 
@@ -265,7 +256,7 @@ namespace GeometryFriendsAgents
         private void UpdateAgentState()
         {
             currentState.updateState(circleInfo.X, circleInfo.Y, circleInfo.VelocityX, circleInfo.VelocityY , circleInfo.Radius );
-            currentPlan.setAgent(currentState);
+            //currentPlan.setAgent(currentState);
         }
 
         private Plan getActivePlan()
@@ -326,7 +317,6 @@ namespace GeometryFriendsAgents
             if (lastMoveTime == 60)
             { 
             lastMoveTime = 0;
-            InformedAction();
              }
             if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
             {
@@ -570,6 +560,7 @@ namespace GeometryFriendsAgents
                     Log.LogInformation("RECEIVED  ZE" );
                     Plan p = (Plan)plans[0];
                     p.active = true;
+                    currentPlan = getActivePlan();
 
                 }
 
