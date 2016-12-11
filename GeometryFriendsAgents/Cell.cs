@@ -113,11 +113,12 @@ namespace GeometryFriendsAgents
                     verticalValue += a.getVectorY();
                 }
             }
-
+            
 
             if (floor)
             {
-                if (verticalValue < 0   )
+
+                if (Math.Abs(verticalValue) > 0 && Math.Abs(x_med) == 0 )
                 {
 
                     j = GeometryFriends.AI.Moves.MORPH_DOWN ;
@@ -127,8 +128,9 @@ namespace GeometryFriendsAgents
                 }
                 else
                 {
-                    if (x_med > 0)
+                    if (x_med > 0 )
                     {
+
                         j = GeometryFriends.AI.Moves.MOVE_RIGHT;
                         this.adj_id.Add(this.id);
                         this.adj_action.Add(j);
@@ -136,12 +138,23 @@ namespace GeometryFriendsAgents
                     }
                     else
                     {
-                        j = GeometryFriends.AI.Moves.MOVE_LEFT;
-                        this.adj_id.Add(this.id);
-                        this.adj_action.Add(j);
-                        movement = j;
+                        if (x_med < 0 )
+                        {
+                            j = GeometryFriends.AI.Moves.MOVE_LEFT;
+                            this.adj_id.Add(this.id);
+                            this.adj_action.Add(j);
+                            movement = j;
+                        }
                     }
                 }
+
+            }
+            else
+            {
+                j = GeometryFriends.AI.Moves.MORPH_UP;
+                this.adj_id.Add(this.id);
+                this.adj_action.Add(j);
+                movement = j;
 
             }
 
@@ -166,7 +179,7 @@ namespace GeometryFriendsAgents
             {
                     if (verticalValue < 0  && !rectangle)
                     {
-                            j = GeometryFriends.AI.Moves.NO_ACTION;
+                            j = GeometryFriends.AI.Moves.JUMP;
                             this.adj_id.Add(this.id);
                             this.adj_action.Add(j);
                             movement = j;  
@@ -179,7 +192,6 @@ namespace GeometryFriendsAgents
                         this.adj_id.Add(this.id);
                         this.adj_action.Add(j);
                         movement = j;
-
                     }
                     else
                     {

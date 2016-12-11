@@ -272,7 +272,7 @@ namespace GeometryFriendsAgents
 
         private void UpdateAgentState()
         {
-            currentState.updateState(rectangleInfo.X + rectangleInfo.VelocityX, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height / 2);
+            currentState.updateState(rectangleInfo.X + rectangleInfo.VelocityX, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height );
             currentPlan.setAgent(currentState);
         }
 
@@ -328,9 +328,6 @@ namespace GeometryFriendsAgents
             {
                 lastMoveTime = 0;
             }
-
-          
-
             if ((lastMoveTime) <= (DateTime.Now.Second) && (lastMoveTime < 60))
             {
                 if (!(DateTime.Now.Second == 59))
@@ -341,48 +338,40 @@ namespace GeometryFriendsAgents
                         try
                         {
                             UpdateAgentState();
-                            if (!this.mup) // pushup
+                            if (!this.mup) // pushup var
                             {
                                 nextAction = currentPlan.executePlan();
-
+                                Log.LogInformation("ACTION IN FALSE MUP" + nextAction.getMove());
                             }
                             else {
-                                Log.LogError("rectangle state" + rectangleInfo.Height);
-                                if (rectangleInfo.Height > 190)
+      
+                                if (rectangleInfo.Height > 190) // morph up complete
                                 {
+                                    Log.LogError("mup complete" + rectangleInfo.Height);
                                     mup = false;
                                 }
                             }
-  
-                            
-                            
                             if (nextAction.getMove() == GeometryFriends.AI.Moves.MORPH_DOWN)
                             {
-                            
                                 messages.Add(currentPlan.set());
-                            
                             }
-                            
                             if (nextAction.getMove() == GeometryFriends.AI.Moves.MORPH_UP)
                             {
-                                messages.Add(new AgentMessage( " ja ta", null));
-                            }
+                                messages.Add(new AgentMessage( "stop", null));
+                               // System.Threading.Thread.Sleep(1000);
 
-                            Log.LogInformation(agentName +" next action" + nextAction.getMove());
+                            }
                             InformedAction();
                         }
                         catch (Exception e)
                         {
                             Log.LogError(agentName + "  -could not execute plan 2.0");
                         }
-                        
                     }
                     catch (Exception e)
                     {
                         Log.LogInformation(agentName + " informed not possible");
                     }
-
-
                     lastMoveTime = lastMoveTime + 1;
                     //DebugSensorsInfo();                    
                 }
@@ -514,17 +503,9 @@ namespace GeometryFriendsAgents
             foreach (AgentMessage item in newMessages)
             {
                 Log.LogInformation("Rectangle: received message from circle: " + item.Message);
-                if (item.Attachment != null)
-                {
-                    Log.LogInformation("Received message has attachment: " + item.Attachment.ToString());
-                    if (item.Attachment.GetType() == typeof(Pen))
-                    {
-                        Log.LogInformation("The attachment is a pen, let's see its color: " + ((Pen)item.Attachment).Color.ToString());
-                    }
-                }
+
                 if (item.Message == "pushup")
                 {
-                    
                     if (item.Attachment != null)
                     {
                         Log.LogInformation("Received message has attachment: " + item.Attachment.ToString());
@@ -537,13 +518,31 @@ namespace GeometryFriendsAgents
                             nextAction = up;
                         }
                     }
-                    Log.LogInformation(agentName + " received pushup");
                 }
+                if (item.Message == "setGoal")
+                {
+                    if (item.Attachment != null)
+                    {
+                        Log.LogInformation("Received message has attachment: " + item.Attachment.ToString());
+                        if (item.Attachment.GetType() == typeof(State))
+                        {
+                            State t = (State)item.Attachment;
+                            Goal goTo = new Goal(t);
+                            Plan newPlan = new Plan();
+                            newPlan.setgoal(goTo);
 
-
+                            Log.LogInformation("goal set on state" + t.getState());
+                            Plan cur = (Plan)plans[0]; // ONE GOAL
+                            cur.active = true;
+                            cur.addSubPlan(newPlan);
+                            currentPlan = getActivePlan();
+                            currentPlan.worldRep.clear();
+                            //currentPlan.worldRep.updateGrid(rectangle);
+                            //currentPlan.worldRep.reflood();
+                        }
+                    }
+                }
             }
-            
-
         }
     }
 }

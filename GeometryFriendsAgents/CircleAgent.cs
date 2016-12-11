@@ -21,7 +21,9 @@ namespace GeometryFriendsAgents
         private bool implementedAgent;
         private string agentName = "myCircle";
         Boolean s = false;  // will
+        Boolean stop = false;
         Boolean growAll = false;
+        Goal real=null;
 
         //auxiliary variables for agent action
         private Moves currentAction;
@@ -166,7 +168,7 @@ namespace GeometryFriendsAgents
                 Log.LogInformation(agentName + "->" + "created plan for goal -" + g.id + "in: " + g.goal.getX() + ":" + g.goal.getY());
                 //flood this goal
                 gridWorld.flood(g);
-                gridWorld.setEmptyCells();
+                gridWorld.setEmptyCells(); // needs to exist
                 gridWorld.setAdjMatrix();
                 //copy gridWorld rep for goal
                 Node AgentNode = gr.getNodeByCellId(gridWorld.locate(currentState).id);
@@ -207,15 +209,12 @@ namespace GeometryFriendsAgents
             initGoals();
             //create plans
             initPlans();
-
-
             //evaluate path
             //order or remove plans
             foreach (Plan pla in plans)
             {
                 pla.active = false;
             }
-
             //comunicate
                 ///for each goal at least one agent should have an active plan for it
             //negociate
@@ -239,14 +238,12 @@ namespace GeometryFriendsAgents
                         //DebugSensorsInfo();
         }
 
-        
         //implements abstract circle interface: provides the circle agent with a simulator to make predictions about the future level state
         public override void ActionSimulatorUpdated(ActionSimulator updatedSimulator)
         {
             predictor = updatedSimulator;
         }
         
-
         //implements abstract circle interface: signals if the agent is actually implemented or not
         public override bool ImplementedAgent()
         {
@@ -261,8 +258,14 @@ namespace GeometryFriendsAgents
 
         private void UpdateAgentState()
         {
-            currentState.updateState(circleInfo.X, circleInfo.Y, circleInfo.VelocityX, circleInfo.VelocityY , circleInfo.Radius );
+            currentState.updateState(circleInfo.X + circleInfo.VelocityX, circleInfo.Y + circleInfo.VelocityY, circleInfo.VelocityX, circleInfo.VelocityY , circleInfo.Radius );
             rectangle.updateState(rectangleInfo.X, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height);
+            if (rectangle.h > 190) // morph up complete
+            {
+                Log.LogError("m_up complete" + rectangleInfo.Height);
+                growAll = true;
+            }
+
             //currentPlan.setAgent(currentState);
         }
 
@@ -278,7 +281,9 @@ namespace GeometryFriendsAgents
                 {
                     if (p.active == true)
                     {
+
                         gridWorld = p.worldRep;
+                        messages.Add(p.setGoal()); //call once ??
                         return p;
                     }
                 }
@@ -318,8 +323,6 @@ namespace GeometryFriendsAgents
         //implements abstract circle interface: updates the agent state logic and predictions
         public override void Update(TimeSpan elapsedGameTime)
         {
-
-
             //Every second one new action is choosen
             if (lastMoveTime == 60)
             { 
@@ -336,35 +339,44 @@ namespace GeometryFriendsAgents
                         try
                         {
                             UpdateAgentState();
-                            Cell AgentCell = gridWorld.locate(currentState);
-                            if (AgentCell.floor && AgentCell.rectangle)
+                           /* if (stop )
                             {
-                                growAll = true;
-                                messages.Add(currentPlan.pushUp());
                                 nextAction = new Action(currentState, Moves.NO_ACTION);
-                                Log.LogInformation("grow" + nextAction.getMove());
+                                messages.Add(currentPlan.pushUp());
+                                Log.LogInformation("ESTA NO STOP" + nextAction.getMove());
                             }
-                            else {
-
-                                if (growAll)
+                            else
+                            {
+                            */ 
+                            Cell AgentCell = gridWorld.locate(currentState);
+                                if (AgentCell.rectangle)
                                 {
-                                    messages.Add(currentPlan.pushUp());
-                                    nextAction = new Action(currentState, Moves.JUMP);
-                                    Log.LogInformation("grow" + nextAction.getMove());
-                                    growAll = false;
+                                    messages.Add(currentPlan.pushUp());  /// send push up ??
+                                nextAction = currentPlan.executePlan();
+                             //   nextAction = new Action(currentState, Moves.NO_ACTION);
+                                    Log.LogInformation("O STOP ESTA A FALSE" + nextAction.getMove());
+
                                 }
                                 else
                                 {
+                                    if (growAll)
+                                    {// aqui
+                                    currentPlan.worldRep.clear();
+                                    currentPlan.worldRep.updateGrid(rectangle);
+                                    currentPlan.setgoal(real);
+                                    currentPlan.worldRep.reflood();
                                     nextAction = currentPlan.executePlan();
-                                    Log.LogInformation(agentName + " next action" + nextAction.getMove());
+                                    //nextAction = new Action(currentState, Moves.JUMP);
+                                        Log.LogInformation("SAIU DA AREA, TEM QUE SALTAR" + nextAction.getMove());
+                                    messages.Add(currentPlan.pushUp());
+                                    growAll = false;
+                                    }
+                                    else
+                                    {
+                                        nextAction = currentPlan.executePlan();
+                                    }
                                 }
-
-                            }
-                          
-                           
-                            
-                           
-               
+                          //  }
                         }
                         catch (Exception e)
                         {
@@ -376,7 +388,6 @@ namespace GeometryFriendsAgents
                         Log.LogInformation(agentName+ " informed not possible");
                     }
                     
-
                     lastMoveTime = lastMoveTime + 1;
                     //DebugSensorsInfo();                    
                 }
@@ -408,9 +419,6 @@ namespace GeometryFriendsAgents
                     }
                 }
             }
-
-
-
             //predict what will happen to the agent given the current state and current action
             if (predictor != null) //predictions are only possible where the agents manager provided
             {
@@ -430,13 +438,18 @@ namespace GeometryFriendsAgents
                     //toSim.DebugInfoSelected = ActionSimulator.DebugInfoMode.Circle;
 
                     //setup the current circle action in the simulator
-                    toSim.AddInstruction(currentAction);;
+                    toSim.AddInstruction(currentAction);
                     //register collectibles that are caught during simulation
                     toSim.SimulatorCollectedEvent += delegate (Object o, CollectibleRepresentation col) { simCaughtCollectibles.Add(col); };
 
                     //simulate 2 seconds (predict what will happen 2 seconds ahead)
                     toSim.Update(2);
-                    
+                    /*
+                    if ( toSim.CirclePositionX - rectangle.getX() > 30 && toSim.CircleVelocityX < 20)
+                    {
+                        stop = true;
+                    }
+                    */
 
                     //prepare all the debug information to be passed to the agents manager
                     List<DebugInformation> newDebugInfo = new List<DebugInformation>();
@@ -590,31 +603,45 @@ namespace GeometryFriendsAgents
                         Log.LogInformation("The attachment is a pen, let's see its color: " + ((Pen)item.Attachment).Color.ToString());
                     }
                 }
-                
+                if (item.Message == "stop")
+                {
+                    if (item.Attachment != null)
+                    {
+                    }
+                    stop = true;
+                }
                 if (item.Message == "imset")
                 {
+                    stop = false;
                     if (item.Attachment != null)
                     {
                         Log.LogInformation("Received message has attachment: " + item.Attachment.ToString());
                         if (item.Attachment.GetType() == typeof(State))
                         {
                             State t = (State)item.Attachment;
+                            t.updateHeight();
                             Goal toJump = new Goal(t);
-                            Plan newPlan = new Plan();
-                            newPlan.setgoal(toJump);
+                            //Plan newPlan = new Plan();
+                            //newPlan.setgoal(toJump);
+                            
                             Log.LogInformation("rectangle set on state" + t.getState());
+
+                            Plan cur = (Plan)plans[0]; // ONE GOAL
+                            cur.active = true;
+                            //cur.addSubPlan(newPlan);
+                            currentPlan = getActivePlan();
+                            currentPlan.worldRep.clear();
+                            currentPlan.worldRep.updateGrid(rectangle);
+                            if (real == null)
+                            {
+                                real = currentPlan.goal;
+                            }
+                            currentPlan.setgoal(toJump);
+                            currentPlan.setGoal();
+                            currentPlan.worldRep.reflood();
                         }
                     }
-
-                    Plan cur = (Plan)plans[0]; // ONE GOAL
-                    cur.active = true;
-                    currentPlan = getActivePlan();
-                    currentPlan.worldRep.clear();
-                    currentPlan.worldRep.updateGrid(rectangle);
-                    currentPlan.worldRep.reflood();
                 }
- 
-
             }
         }
     }

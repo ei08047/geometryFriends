@@ -12,6 +12,7 @@ namespace GeometryFriendsAgents
 { 
     public class Plan
     {
+        public String name;
         public Grid worldRep;
         public Graph p;
         public Path path;
@@ -31,6 +32,11 @@ namespace GeometryFriendsAgents
         /// <summary>
         /// setters
         /// </summary>
+        /// 
+        public void setName(String n)
+        {
+            name = n;
+        }
         public void setgoal(Goal g) {
             goal = g;
             
@@ -79,7 +85,7 @@ namespace GeometryFriendsAgents
             subStack.Pop();
             sub.order = subStack.Count;
             plans.Push(sub);
-            order++;
+           // order++;
         }
 
         public void buildPath() {
@@ -115,18 +121,26 @@ namespace GeometryFriendsAgents
 
             return m;
         }
-        public AgentMessage pushUp()
+        public AgentMessage pushUp() // circle
         {
             AgentMessage m = new AgentMessage("pushup", this.agent);
             return m;
         }
-        public AgentMessage set()
+        public AgentMessage set() // rectangle
         {
             AgentMessage m = new AgentMessage("imset", this.agent);
             return m;
         }
+        public AgentMessage setGoal() // rectangle
+        {
+            AgentMessage m = new AgentMessage("goal", this.goal);
+            return m;
+        }
+
         public Action executePlan()
         {
+
+
             Plan curr;
             if (order != 0)
             {
@@ -137,6 +151,7 @@ namespace GeometryFriendsAgents
             }
             else
             {
+                //check plan name.. execute accordingly
                 Cell c = worldRep.locate(agent);
                 if (c == null)
                 {
@@ -149,15 +164,12 @@ namespace GeometryFriendsAgents
                     Log.LogInformation("null locate" + p.getNodes().Count);
                 }
                 Log.LogError("located agent at:" + current.cellId + " type " + worldRep.getCellbyId(current.cellId).floor);
-                current.eval(this.worldRep);
+                //current.eval(this.worldRep);
+                
                 Action f = new Action(current.getState(), worldRep.getCellbyId(current.cellId).movement);
+             
                 return f;
             }
-
-           
-
-   //         return pathNode.getEdge(nextPathNode); 
-
         }
     }
 }

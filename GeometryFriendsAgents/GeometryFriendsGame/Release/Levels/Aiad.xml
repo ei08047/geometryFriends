@@ -143,7 +143,24 @@
     <OrangeElevators />
     <HighScores>
       <HighScore name="myCircle&amp;myRectangle" value="12" />
-      <HighScore name="myCircle&amp;myRectangle" value="56" />
+      <HighScore name="myCircle&amp;myRectangle" value="13" />
+      <HighScore name="myCircle&amp;myRectangle" value="23" />
+      <HighScore name="myCircle&amp;myRectangle" value="30" />
+      <HighScore name="myCircle&amp;myRectangle" value="52" />
     </HighScores>
   </Level7>
+  <Level8>
+    <Description />
+    <Tips />
+    <BallStartingPosition X="88" Y="568" />
+    <SquareStartingPosition X="1176" Y="632" />
+    <Collectibles>
+      <Collectible X="600" Y="184" />
+    </Collectibles>
+    <GreenObstacles />
+    <BlackObstacles />
+    <YellowObstacles />
+    <GreenElevators />
+    <OrangeElevators />
+  </Level8>
 </Levels>

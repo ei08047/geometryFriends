@@ -46,7 +46,7 @@ namespace GeometryFriendsAgents
         }
         public void updateHeight()
         {
-            this._posY += (720 - this._posY) / 2;
+            this._posY += (720 - this._posY)/2 ;
             Log.LogInformation("New height" + this._posY.ToString());
         }
         public float getX()

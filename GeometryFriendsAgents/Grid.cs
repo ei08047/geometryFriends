@@ -437,8 +437,8 @@ namespace GeometryFriendsAgents
     
             int xi = widthToCells(p.getX() - 2*p.h);
             int xf = widthToCells(p.getX() + 2*p.h);
-            int yi = heightToCells(p.getY() - 3*p.h);
-            int yf = heightToCells(p.getY() + 3*p.h);
+            int yi = heightToCells(p.getY() - 4*p.h);
+            int yf = heightToCells(p.getY() + (p.h)/2);
             add_grid_agent(xi,xf,yi,yf);
         }
 
