@@ -14,6 +14,7 @@ namespace GeometryFriendsAgents
         public Cell[,] grid = new Cell[42, 42];
         public ArrayList obstacles = new ArrayList();
         public ArrayList emptyCells = new ArrayList();
+        Goal goal;
         string agentName;
         public Grid() {
             int id = 0;
@@ -136,120 +137,6 @@ namespace GeometryFriendsAgents
                 }
             }
         }
-        public void flood(Goal goal) {
-
-            Log.LogInformation("start flood");
-            int i = 1; // value increment
-            emptyCells = getFreeCells();
-            ArrayList viz= new ArrayList(); 
-            // starting at goal cell
-            Cell h = locate(goal.getState() );
-            Log.LogInformation("Goal" + goal.id + " located at(H/W):" + h.pos[0] +" / " + h.pos[1]);
-
-            h.set_value(0);
-                h.seen = true;
-                // find neighboors
-                viz = h.getKViz(emptyCells, i);
-
-            ArrayList nextViz = new ArrayList();
-            ArrayList availableCells = emptyCells;
-            availableCells.Remove(h);
-            while (availableCells.Count != 0)
-            {
-                foreach (Cell v in viz)
-                   {
-                    if (!v.seen){
-                         v.incVal(i);
-                         v.seen = true;
-                        availableCells.Remove(v);
-                        //get possible neigh
-                         ArrayList possibleNeighboors = v.getKViz(availableCells, 1);
-                        
-                            foreach (Cell n in possibleNeighboors)
-                            {
-                            if( availableCells.Contains(n) && !n.seen)
-                                nextViz.Add(n);
-                            }
-                            }
-                }
-                i++;
-                foreach (Cell next in nextViz)
-                {
-                    if (!viz.Contains(next) && availableCells.Contains(next))
-                        viz.Add(next);
-                }
-            }
-            setEmptyCells();
-            Log.LogInformation("calculating vectors" + emptyCells.Count);
-            calculateVectors(emptyCells);
-            Log.LogInformation("calculated flood values");
-        }
-        public void clear()
-        {
-            foreach (Cell e in grid)
-            {
-                e.set_value(0);
-                e.seen = false;
-                
-            }
-        }
-        public void calculateVectors(ArrayList free) {
-            foreach (Cell c in free)
-            {
-                calcVectorCell(c);
-            }
-        }
-        public void calcVectorCell(Cell c)
-        {
-            int left, right, up, down;
-            try
-            {
-                left = getLeft(c).value;
-                right = getRight(c).value;
-                up = getUp(c).value;
-                down = getDown(c).value;
-                if ((left == 0 && right > 3))
-                {
-                    c.vector[0] = 1;
-                }
-                else {
-                    if ((right == 0 && left > 3))
-                    {
-                        c.vector[0] = -1;
-                    }
-                    else {
-                        c.vector[0] = left - right;
-                    }
-                }
-                ///
-                if ((up == 0 && down > 3))
-                {
-                    c.vector[1] = 1;
-                }
-                else
-                {
-                    if ((down == 0 && up > 3))
-                    {
-                        c.vector[1] = 0;
-                    }
-                    else
-                    {
-                        c.vector[1] = up - down;
-                    }
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("calc vector", e);
-            }
-        }
-        public Cell locate(State p) { 
-            int i, j;
-            i = widthToCells(p.getX());
-            j = heightToCells(p.getY()) ;
-            return getCell(i, j);
-        }
 
         public int setFloor() {
             int count = 0;
@@ -335,6 +222,183 @@ namespace GeometryFriendsAgents
             }
         }
 
+        public void flood(Goal goal)
+        {
+            this.goal = goal;
+            Log.LogInformation("start flood");
+            int i = 1; // value increment
+            emptyCells = getFreeCells();
+            ArrayList viz = new ArrayList();
+            // starting at goal cell
+            Cell h = locate(goal.getState());
+            Log.LogInformation("Goal" + goal.id + " located at(H/W):" + h.pos[0] + " / " + h.pos[1]);
+
+            h.set_value(0);
+            h.seen = true;
+            // find neighboors
+            viz = h.getKViz(emptyCells, i);
+
+            ArrayList nextViz = new ArrayList();
+            ArrayList availableCells = emptyCells;
+            availableCells.Remove(h);
+            while (availableCells.Count != 0)
+            {
+                foreach (Cell v in viz)
+                {
+                    if (!v.seen)
+                    {
+                        v.incVal(i);
+                        v.seen = true;
+                        availableCells.Remove(v);
+                        //get possible neigh
+                        ArrayList possibleNeighboors = v.getKViz(availableCells, 1);
+
+                        foreach (Cell n in possibleNeighboors)
+                        {
+                            if (availableCells.Contains(n) && !n.seen)
+                                nextViz.Add(n);
+                        }
+                    }
+                }
+                i++;
+                foreach (Cell next in nextViz)
+                {
+                    if (!viz.Contains(next) && availableCells.Contains(next))
+                        viz.Add(next);
+                }
+            }
+            setEmptyCells();
+            Log.LogInformation("calculating vectors" + emptyCells.Count);
+            calculateVectors(emptyCells);
+            Log.LogInformation("calculated flood values");
+        }
+        public void reflood()
+        {
+
+            Log.LogInformation("start flood");
+            int i = 1; // value increment
+            emptyCells = getFreeCells();
+            ArrayList viz = new ArrayList();
+            // starting at goal cell
+            Cell h = locate(goal.getState());
+
+            h.set_value(0);
+            h.seen = true;
+            // find neighboors
+            viz = h.getKViz(emptyCells, i);
+
+            ArrayList nextViz = new ArrayList();
+            ArrayList availableCells = emptyCells;
+            availableCells.Remove(h);
+            while (availableCells.Count != 0)
+            {
+                foreach (Cell v in viz)
+                {
+                    if (!v.seen)
+                    {
+                        v.incVal(i);
+                        v.seen = true;
+                        availableCells.Remove(v);
+                        //get possible neigh
+                        ArrayList possibleNeighboors = v.getKViz(availableCells, 1);
+
+                        foreach (Cell n in possibleNeighboors)
+                        {
+                            if (availableCells.Contains(n) && !n.seen)
+                                nextViz.Add(n);
+                        }
+                    }
+                }
+                i++;
+                foreach (Cell next in nextViz)
+                {
+                    if (!viz.Contains(next) && availableCells.Contains(next))
+                        viz.Add(next);
+                }
+            }
+            setEmptyCells();
+            Log.LogInformation("calculating vectors" + emptyCells.Count);
+            calculateVectors(emptyCells);
+            Log.LogInformation("calculated flood values");
+        }
+        public void clear()
+        {
+            foreach (Cell e in grid)
+            {
+                try
+                {
+                    e.set_value(0);
+                    e.seen = false;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("merda", ex);
+                }
+
+            }
+        }
+        public void calculateVectors(ArrayList free)
+        {
+            foreach (Cell c in free)
+            {
+                calcVectorCell(c);
+            }
+        }
+        public void calcVectorCell(Cell c)
+        {
+            int left, right, up, down;
+            try
+            {
+                left = getLeft(c).value;
+                right = getRight(c).value;
+                up = getUp(c).value;
+                down = getDown(c).value;
+                if ((left == 0 && right > 3))
+                {
+                    c.vector[0] = 1;
+                }
+                else
+                {
+                    if ((right == 0 && left > 3))
+                    {
+                        c.vector[0] = -1;
+                    }
+                    else
+                    {
+                        c.vector[0] = left - right;
+                    }
+                }
+                ///
+                if ((up == 0 && down > 3))
+                {
+                    c.vector[1] = 1;
+                }
+                else
+                {
+                    if ((down == 0 && up > 3))
+                    {
+                        c.vector[1] = 0;
+                    }
+                    else
+                    {
+                        c.vector[1] = up - down;
+                    }
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("calc vector", e);
+            }
+        }
+        public Cell locate(State p)
+        {
+            int i, j;
+            i = widthToCells(p.getX());
+            j = heightToCells(p.getY());
+            return getCell(i, j);
+        }
+
         public void add_grid_agent(int xi, int xf, int yi, int yf)
         {
 
@@ -352,29 +416,42 @@ namespace GeometryFriendsAgents
         }
         public void updateGrid(State p)
         {
+
             foreach (Cell c in grid)
             {
-                if (c.rectangle)
+                try
                 {
-                    c.rectangle = false;
-                    c.obstacle = false;
+                    if (c.rectangle)
+                    {
+                        c.rectangle = false;
+                        c.obstacle = false;
+                    }
                 }
+                catch (Exception err)
+                {
+                    Console.WriteLine("ashads", err);
+                }
+
             }
-            int xi = widthToCells(p.getX() - p.h);
-            int xf = widthToCells(p.getX() + p.h);
-            int yi = heightToCells(p.getY() - p.h);
-            int yf = heightToCells(p.getY() + p.h);
+
+    
+            int xi = widthToCells(p.getX() - 2*p.h);
+            int xf = widthToCells(p.getX() + 2*p.h);
+            int yi = heightToCells(p.getY() - 3*p.h);
+            int yf = heightToCells(p.getY() + 3*p.h);
             add_grid_agent(xi,xf,yi,yf);
         }
 
         //casters
         public int widthToCells(float width) {
-            int temp = (int)( (width * 39) / 1200) ;
-            if (temp > 39)
-                temp = 39;
-            if (temp < 0)
-                temp = 0;
-            return temp ;
+
+                int temp = (int)((width * 39) / 1200);
+                if (temp > 39)
+                    temp = 39;
+                if (temp < 0)
+                    temp = 0;
+                return temp;
+
         }
         public int heightToCells(float height) {
             int temp = (int)((height * 39) / 720);

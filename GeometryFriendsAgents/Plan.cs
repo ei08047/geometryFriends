@@ -23,6 +23,7 @@ namespace GeometryFriendsAgents
         public Boolean pathToGoal = false;
         public Boolean active = false;
         public Boolean collaborative=false;
+        public Stack plans = new Stack();
 
         public Plan()
         {
@@ -32,6 +33,7 @@ namespace GeometryFriendsAgents
         /// </summary>
         public void setgoal(Goal g) {
             goal = g;
+            
         }
         public void setGridWorld(Grid w) {
             worldRep = w;
@@ -67,6 +69,18 @@ namespace GeometryFriendsAgents
                 i++;
             }
         }
+        public void updatePlanState()
+        {
+            
+        }
+        public void addSubPlan(Plan sub)
+        {
+            Stack subStack = plans;
+            subStack.Pop();
+            sub.order = subStack.Count;
+            plans.Push(sub);
+            order++;
+        }
 
         public void buildPath() {
             Cell goalCell = worldRep.locate(goal.getState());
@@ -90,9 +104,9 @@ namespace GeometryFriendsAgents
                     pathToGoal = true;
                 }
             }
-        }
+        } // not imp
         public Boolean finishedPlan() {
-            return finished;
+                return finished;
         }
 
         public AgentMessage talk()
@@ -101,35 +115,46 @@ namespace GeometryFriendsAgents
 
             return m;
         }
+        public AgentMessage pushUp()
+        {
+            AgentMessage m = new AgentMessage("pushup", this.agent);
+            return m;
+        }
+        public AgentMessage set()
+        {
+            AgentMessage m = new AgentMessage("imset", this.agent);
+            return m;
+        }
         public Action executePlan()
         {
-            Log.LogError("executing plan");
-
-            Cell c = worldRep.locate(agent);
-            if (c == null)
+            Plan curr;
+            if (order != 0)
             {
-                Log.LogError("nullllll cell");
+                curr = (Plan)plans.Pop();
+                order--;
+                return curr.executePlan();
+                Log.LogError("executing plan for goal" + this.goal.getPosition());
             }
-            Node current = p.getNodeByCellId(c.id);
-            if (current == null)
+            else
             {
-                Log.LogInformation("null locate"+ p.getNodes().Count);
-            }
-            else {
-                Log.LogInformation("dammmmm" + p.getNodes().Count);
-            }
-            //Node nextNode = null;
-            Log.LogError("located agent at:" + current.cellId + " type " + worldRep.getCellbyId(current.cellId).floor);
-            current.eval(this.worldRep);
-            //int currentVal = current.value;
-            // find equal value node in path -> pathNODE
-            //Node pathNode = path.Locate(currentVal );
+                Cell c = worldRep.locate(agent);
+                if (c == null)
+                {
+                    Log.LogError("nullllll cell");
+                }
 
-            //Node nextPathNode = path.getNextNode();
-            //Log.LogInformation("vertical value =" + worldRep.getCellbyId(current.cellId).verticalValue);
-            Action f = new Action(current.getState(), worldRep.getCellbyId(current.cellId).movement);
+                Node current = p.getNodeByCellId(c.id);
+                if (current == null)
+                {
+                    Log.LogInformation("null locate" + p.getNodes().Count);
+                }
+                Log.LogError("located agent at:" + current.cellId + " type " + worldRep.getCellbyId(current.cellId).floor);
+                current.eval(this.worldRep);
+                Action f = new Action(current.getState(), worldRep.getCellbyId(current.cellId).movement);
+                return f;
+            }
 
-            return f;
+           
 
    //         return pathNode.getEdge(nextPathNode); 
 

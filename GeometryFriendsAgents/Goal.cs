@@ -23,11 +23,15 @@ namespace GeometryFriendsAgents
         {
             goal = s;
         }
-
         public Position getPosition()
         {
             Position p = new Position(goal.getX(), goal.getY());
             return p;
+        }
+        public Goal generateNew(State newState)
+        {
+            newState.updateHeight();
+            return new Goal(newState);
         }
         public State getState()
         {
@@ -48,6 +52,7 @@ namespace GeometryFriendsAgents
         {
             return catched;
         }
+
 
 
     }

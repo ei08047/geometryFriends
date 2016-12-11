@@ -20,6 +20,8 @@ namespace GeometryFriendsAgents
         //agent implementation specificiation
         private bool implementedAgent;
         private string agentName = "myCircle";
+        Boolean s = false;  // will
+        Boolean growAll = false;
 
         //auxiliary variables for agent action
         private Moves currentAction;
@@ -62,6 +64,7 @@ namespace GeometryFriendsAgents
         //low level representation
         Grid gridWorld = new Grid();
         State currentState;
+        State rectangle;
 
         //Area of the game screen
         private Rectangle area;
@@ -126,6 +129,7 @@ namespace GeometryFriendsAgents
                 case "myCircle":
                     {
                         currentState = new State(circleInfo.VelocityX, circleInfo.VelocityY, circleInfo.X, circleInfo.Y ,circleInfo.Radius);
+                        rectangle = new State(rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.X, rectangleInfo.Y, rectangleInfo.Height / 2);
                         Cell AgentCell = gridWorld.locate(currentState);
                         break;
                     }
@@ -142,8 +146,11 @@ namespace GeometryFriendsAgents
             foreach (CollectibleRepresentation c in collectiblesInfo)
             {
                 Goal t = new Goal(c, goalId);
-                Log.LogInformation("created goal: " + goalId + "  on position: " + c.X + " --" + c.X);
+                State GoalState = t.getState();
+                Log.LogInformation(agentName + "created goal: " + goalId + "  on position: " + c.X + " --" + c.Y);
                 goalId++;
+                Goal updated = t.generateNew(GoalState);
+                Log.LogInformation(agentName + "created goal: " + goalId + "  on position: " + updated.getPosition() );
                 goals.Add(t);
             }
         }
@@ -214,7 +221,6 @@ namespace GeometryFriendsAgents
             //negociate
                 ///if both have only one should keep it
             //send a message to the rectangle informing that the circle setup is complete and show how to pass an attachment: a pen object
-            messages.Add(new AgentMessage("Setup complete, testing to send an object as an attachment.", new Pen(Color.AliceBlue)));
 
             //DebugSensorsInfo();
         }
@@ -256,6 +262,7 @@ namespace GeometryFriendsAgents
         private void UpdateAgentState()
         {
             currentState.updateState(circleInfo.X, circleInfo.Y, circleInfo.VelocityX, circleInfo.VelocityY , circleInfo.Radius );
+            rectangle.updateState(rectangleInfo.X, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height);
             //currentPlan.setAgent(currentState);
         }
 
@@ -328,8 +335,36 @@ namespace GeometryFriendsAgents
                     {
                         try
                         {
-                            nextAction = currentPlan.executePlan();
-                            Log.LogInformation("next action" + nextAction.getMove());
+                            UpdateAgentState();
+                            Cell AgentCell = gridWorld.locate(currentState);
+                            if (AgentCell.floor && AgentCell.rectangle)
+                            {
+                                growAll = true;
+                                messages.Add(currentPlan.pushUp());
+                                nextAction = new Action(currentState, Moves.NO_ACTION);
+                                Log.LogInformation("grow" + nextAction.getMove());
+                            }
+                            else {
+
+                                if (growAll)
+                                {
+                                    messages.Add(currentPlan.pushUp());
+                                    nextAction = new Action(currentState, Moves.JUMP);
+                                    Log.LogInformation("grow" + nextAction.getMove());
+                                    growAll = false;
+                                }
+                                else
+                                {
+                                    nextAction = currentPlan.executePlan();
+                                    Log.LogInformation(agentName + " next action" + nextAction.getMove());
+                                }
+
+                            }
+                          
+                           
+                            
+                           
+               
                         }
                         catch (Exception e)
                         {
@@ -338,7 +373,7 @@ namespace GeometryFriendsAgents
                         InformedAction();
                     }
                     catch (Exception e) {
-                        Log.LogInformation(" informed not possible");
+                        Log.LogInformation(agentName+ " informed not possible");
                     }
                     
 
@@ -430,7 +465,7 @@ namespace GeometryFriendsAgents
                     foreach (Cell c in gridWorld.grid)
                     {
                         newDebugInfo.Add(DebugInformationFactory.CreateTextDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]) , gridWorld.CelltoHeight(c.pos[1]) ), c.vector[0].ToString(), GeometryFriends.XNAStub.Color.Black));
-                        /*
+                        
                         if (c.obstacle)
                         {
                             newDebugInfo.Add(DebugInformationFactory.CreateCircleDebugInfo(new PointF(gridWorld.CelltoWidth(c.pos[0]), gridWorld.CelltoHeight(c.pos[1])), 8, GeometryFriends.XNAStub.Color.PaleTurquoise));
@@ -448,7 +483,7 @@ namespace GeometryFriendsAgents
                             }
                               
                         }
-                        */
+                        
 
 
                         if (gridWorld.locate(currentState).id == c.id)
@@ -555,14 +590,30 @@ namespace GeometryFriendsAgents
                         Log.LogInformation("The attachment is a pen, let's see its color: " + ((Pen)item.Attachment).Color.ToString());
                     }
                 }
-                if (item.Message == "ze" )
+                
+                if (item.Message == "imset")
                 {
-                    Log.LogInformation("RECEIVED  ZE" );
-                    Plan p = (Plan)plans[0];
-                    p.active = true;
-                    currentPlan = getActivePlan();
+                    if (item.Attachment != null)
+                    {
+                        Log.LogInformation("Received message has attachment: " + item.Attachment.ToString());
+                        if (item.Attachment.GetType() == typeof(State))
+                        {
+                            State t = (State)item.Attachment;
+                            Goal toJump = new Goal(t);
+                            Plan newPlan = new Plan();
+                            newPlan.setgoal(toJump);
+                            Log.LogInformation("rectangle set on state" + t.getState());
+                        }
+                    }
 
+                    Plan cur = (Plan)plans[0]; // ONE GOAL
+                    cur.active = true;
+                    currentPlan = getActivePlan();
+                    currentPlan.worldRep.clear();
+                    currentPlan.worldRep.updateGrid(rectangle);
+                    currentPlan.worldRep.reflood();
                 }
+ 
 
             }
         }

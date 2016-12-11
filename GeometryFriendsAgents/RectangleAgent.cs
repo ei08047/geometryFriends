@@ -20,6 +20,7 @@ namespace GeometryFriendsAgents
         //agent implementation specificiation
         private bool implementedAgent;
         private string agentName = "myRectangle";
+        public Boolean mup = false;
 
         //auxiliary variables for agent action
         private Moves currentAction;
@@ -142,8 +143,10 @@ namespace GeometryFriendsAgents
             foreach (CollectibleRepresentation c in collectiblesInfo)
             {
                 Goal t = new Goal(c, goalId);
-                Log.LogInformation("created goal: " + goalId + "  on position: " + c.X + " --" + c.X);
+                State GoalState = t.getState();
+                Log.LogInformation("created goal: " + goalId + "  on position: " + c.X + " --" + c.Y);
                 goalId++;
+                Goal updated = t.generateNew(GoalState);
                 goals.Add(t);
             }
         }
@@ -269,7 +272,7 @@ namespace GeometryFriendsAgents
 
         private void UpdateAgentState()
         {
-            currentState.updateState(rectangleInfo.X , rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height / 2);
+            currentState.updateState(rectangleInfo.X + rectangleInfo.VelocityX, rectangleInfo.Y, rectangleInfo.VelocityX, rectangleInfo.VelocityY, rectangleInfo.Height / 2);
             currentPlan.setAgent(currentState);
         }
 
@@ -338,13 +341,33 @@ namespace GeometryFriendsAgents
                         try
                         {
                             UpdateAgentState();
-                            nextAction = currentPlan.executePlan();
+                            if (!this.mup) // pushup
+                            {
+                                nextAction = currentPlan.executePlan();
+
+                            }
+                            else {
+                                Log.LogError("rectangle state" + rectangleInfo.Height);
+                                if (rectangleInfo.Height > 190)
+                                {
+                                    mup = false;
+                                }
+                            }
+  
+                            
+                            
+                            if (nextAction.getMove() == GeometryFriends.AI.Moves.MORPH_DOWN)
+                            {
+                            
+                                messages.Add(currentPlan.set());
+                            
+                            }
                             
                             if (nextAction.getMove() == GeometryFriends.AI.Moves.MORPH_UP)
                             {
-                                messages.Add(currentPlan.talk());
+                                messages.Add(new AgentMessage( " ja ta", null));
                             }
-                            
+
                             Log.LogInformation(agentName +" next action" + nextAction.getMove());
                             InformedAction();
                         }
@@ -499,7 +522,28 @@ namespace GeometryFriendsAgents
                         Log.LogInformation("The attachment is a pen, let's see its color: " + ((Pen)item.Attachment).Color.ToString());
                     }
                 }
+                if (item.Message == "pushup")
+                {
+                    
+                    if (item.Attachment != null)
+                    {
+                        Log.LogInformation("Received message has attachment: " + item.Attachment.ToString());
+                        if (item.Attachment.GetType() == typeof(State))
+                        {
+                            State t = (State)item.Attachment;
+                            Log.LogInformation("circle on state" + t.getState());
+                            Action up = new Action(t, Moves.MORPH_UP);
+                            mup = true;
+                            nextAction = up;
+                        }
+                    }
+                    Log.LogInformation(agentName + " received pushup");
+                }
+
+
             }
+            
+
         }
     }
 }

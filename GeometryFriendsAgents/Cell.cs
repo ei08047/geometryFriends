@@ -97,12 +97,11 @@ namespace GeometryFriendsAgents
         public float getYcoord() {
             return (getY() * 720) / 40;
         }
-
         public void setAdjRectangle(ArrayList free)
         {
-            int k = 1;
+            int k = 3;
             GeometryFriends.AI.Moves j;
-            ArrayList all = this.getKViz(free, 2);
+            ArrayList all = this.getKViz(free, k);
             int x = this.getVectorX();
             int y = this.getVectorY();
             int x_med = 0;
@@ -121,7 +120,7 @@ namespace GeometryFriendsAgents
                 if (verticalValue < 0   )
                 {
 
-                    j = GeometryFriends.AI.Moves.MORPH_UP;
+                    j = GeometryFriends.AI.Moves.MORPH_DOWN ;
                     this.adj_id.Add(this.id);
                     this.adj_action.Add(j);
                     movement = j;
@@ -165,36 +164,45 @@ namespace GeometryFriendsAgents
             }
             if (floor)
             {
-                    if (verticalValue < 0)
+                    if (verticalValue < 0  && !rectangle)
                     {
-                            j = GeometryFriends.AI.Moves.JUMP;
+                            j = GeometryFriends.AI.Moves.NO_ACTION;
                             this.adj_id.Add(this.id);
                             this.adj_action.Add(j);
                             movement = j;  
                     }
                 else
                 {
-                    if (x_med > 0)
+                    if (rectangle)
                     {
-                        j = GeometryFriends.AI.Moves.ROLL_RIGHT;
+                        j = GeometryFriends.AI.Moves.NO_ACTION;
                         this.adj_id.Add(this.id);
                         this.adj_action.Add(j);
                         movement = j;
+
                     }
                     else
                     {
-                        j = GeometryFriends.AI.Moves.ROLL_LEFT;
-                        this.adj_id.Add(this.id);
-                        this.adj_action.Add(j);
-                        movement = j;
+                        if (x_med > 0)
+                        {
+                            j = GeometryFriends.AI.Moves.ROLL_RIGHT;
+                            this.adj_id.Add(this.id);
+                            this.adj_action.Add(j);
+                            movement = j;
+                        }
+                        else
+                        {
+                            j = GeometryFriends.AI.Moves.ROLL_LEFT;
+                            this.adj_id.Add(this.id);
+                            this.adj_action.Add(j);
+                            movement = j;
+                        }
                     }
                 }
                    
             }
             
         }
-
-
         public int getVectorX()
         {
             return this.vector[0];

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GeometryFriends;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,6 +43,11 @@ namespace GeometryFriendsAgents
              this._posY = Y ;
             this._velocityX = VelocityX;
             this._velocityY = VelocityY;
+        }
+        public void updateHeight()
+        {
+            this._posY += (720 - this._posY) / 2;
+            Log.LogInformation("New height" + this._posY.ToString());
         }
         public float getX()
         { return this._posX;  }

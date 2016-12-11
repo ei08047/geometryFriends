@@ -22,6 +22,7 @@
       <HighScore name="myCircle&amp;myRectangle" value="8" />
       <HighScore name="myCircle&amp;myRectangle" value="8" />
       <HighScore name="myCircle&amp;myRectangle" value="9" />
+      <HighScore name="myCircle&amp;myRectangle" value="9" />
       <HighScore name="myCircle&amp;myRectangle" value="10" />
     </HighScores>
   </Level1>
@@ -31,17 +32,13 @@
     <BallStartingPosition X="88" Y="664" />
     <SquareStartingPosition X="264" Y="664" />
     <Collectibles>
-      <Collectible X="1208" Y="248" />
+      <Collectible X="1176" Y="120" />
     </Collectibles>
     <GreenObstacles />
     <BlackObstacles />
     <YellowObstacles />
     <GreenElevators />
     <OrangeElevators />
-    <HighScores>
-      <HighScore name="myCircle&amp;myRectangle" value="9" />
-      <HighScore name="myCircle&amp;myRectangle" value="55" />
-    </HighScores>
   </Level2>
   <Level3>
     <Description />
@@ -59,6 +56,10 @@
     <YellowObstacles />
     <GreenElevators />
     <OrangeElevators />
+    <HighScores>
+      <HighScore name="myRectangle" value="2" />
+      <HighScore name="myRectangle" value="2" />
+    </HighScores>
   </Level3>
   <Level4>
     <Description />
@@ -124,4 +125,25 @@
     <OrangeElevators />
     <TimeLimit value="9" />
   </Level6>
+  <Level7>
+    <Description />
+    <Tips />
+    <BallStartingPosition X="104" Y="504" />
+    <SquareStartingPosition X="248" Y="552" />
+    <Collectibles>
+      <Collectible X="1176" Y="104" />
+    </Collectibles>
+    <GreenObstacles />
+    <BlackObstacles>
+      <Obstacle width="1200" height="48" X="40" Y="664" centered="false" />
+      <Obstacle width="960" height="48" X="40" Y="616" centered="false" />
+    </BlackObstacles>
+    <YellowObstacles />
+    <GreenElevators />
+    <OrangeElevators />
+    <HighScores>
+      <HighScore name="myCircle&amp;myRectangle" value="12" />
+      <HighScore name="myCircle&amp;myRectangle" value="56" />
+    </HighScores>
+  </Level7>
 </Levels>
